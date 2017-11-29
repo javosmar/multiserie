@@ -81,10 +81,10 @@ void MainWindow::insertarUsuario()
     QSqlQuery insertar;
     insertar.prepare(consulta);
     if(insertar.exec()){
-        qDebug() << "usuario agregado correctamente";
+        //qDebug() << "usuario agregado correctamente";
     }
     else{
-        qDebug() << "ERROR! " << insertar.lastError();
+        //qDebug() << "ERROR! " << insertar.lastError();
     }
 }
 
@@ -95,7 +95,7 @@ void MainWindow::mostrarDatos()
     QSqlQuery mostrar;
     mostrar.prepare(consulta);
     if(mostrar.exec()){
-        qDebug() << "consulta realizada con exito";
+        //qDebug() << "consulta realizada con exito";
     }
     else{
         qDebug() << "ERROR! " << mostrar.lastError();
@@ -132,7 +132,7 @@ void MainWindow::Serial_Conect()
         ui->serie_actualizar->setEnabled(false);
         ui->serie_desconectar->setEnabled(true);
         serial->write("A");
-        mThread->start(QThread::LowPriority);
+        mThread->start(QThread::LowestPriority);
     }
     else{
         Serial_Error();
@@ -167,8 +167,13 @@ void MainWindow::Serial_Pedir()
         longitud = QString::number(serial->read(11).append("e-02").toDouble(&ok),'f',7);
         velocidad = serial->read(5);
         pulsacion = serial->read(1);
+        qDebug() << validez;
+        qDebug() << latitud;
+        qDebug() << longitud;
+        qDebug() << velocidad;
+        qDebug() << pulsacion;
         insertarUsuario();
-        mostrarDatos();
+        //mostrarDatos();
     }
 }
 
@@ -190,4 +195,5 @@ void MainWindow::on_serie_combo_activated(const QString &arg1)
 void MainWindow::on_serie_desconectar_clicked()
 {
     Serial_Desconect();
+    mostrarDatos();
 }
