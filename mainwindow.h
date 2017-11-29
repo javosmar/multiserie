@@ -26,6 +26,12 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    //----Plot----
+    void addPoint(double x, double y);
+    void clearData();
+    void plot();
+    //------------
+
     void crearTablaUsuarios();
     void insertarUsuario();
     void mostrarDatos();
@@ -47,11 +53,14 @@ private slots:
 
     void on_serie_desconectar_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
     QSqlDatabase db;
     DuThread *mThread;
+    QVector<double> qv_x, qv_y;
 };
 
 #endif // MAINWINDOW_H

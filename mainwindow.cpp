@@ -19,6 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->serie_combo->insertItem(0,info.portName());
     }
     ui->serie_desconectar->setEnabled(false);
+
+    //-----Plot----
+    ui->plot->addGraph();
+    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
+    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
+    ui->plot->xAxis->setRange(3144887,3144935);
+    ui->plot->yAxis->setRange(6030912,6030966);
+
+    ui->doubleSpinBox_xmin->setValue(3144887);
+    ui->doubleSpinBox_xmax->setValue(3144935);
+    ui->doubleSpinBox_ymin->setValue(6030912);
+    ui->doubleSpinBox_ymax->setValue(6030966);
     //------SQL------
     qDebug() << "Iniciado";
     QString nombre;
@@ -109,8 +121,10 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
+        addPoint(mostrar.value(2).toFloat(&ok), mostrar.value(3).toDouble(&ok));
         fila++;
     }
+    plot();
 }
 
 void MainWindow::Serial_Conf()
@@ -163,15 +177,12 @@ void MainWindow::Serial_Pedir()
 {
     if(serial->bytesAvailable() >= 28){
         validez = serial->read(1);
-        latitud = QString::number(serial->read(10).append("e-02").toDouble(&ok),'f',7);
-        longitud = QString::number(serial->read(11).append("e-02").toDouble(&ok),'f',7);
+        latitud = QString::number(serial->read(8).append("e+3").toDouble(&ok),'f');
+        QString perdido = serial->read(2);
+        longitud = QString::number(serial->read(9).append("e+3").toDouble(&ok),'f');
+        perdido = serial->read(2);
         velocidad = serial->read(5);
         pulsacion = serial->read(1);
-        qDebug() << validez;
-        qDebug() << latitud;
-        qDebug() << longitud;
-        qDebug() << velocidad;
-        qDebug() << pulsacion;
         insertarUsuario();
         //mostrarDatos();
     }
@@ -196,4 +207,31 @@ void MainWindow::on_serie_desconectar_clicked()
 {
     Serial_Desconect();
     mostrarDatos();
+}
+
+void MainWindow::addPoint(double x, double y)
+{
+    qv_x.append(x);
+    qv_y.append(y);
+}
+
+void MainWindow::clearData()
+{
+    qv_x.clear();
+    qv_y.clear();
+}
+
+void MainWindow::plot()
+{
+    ui->plot->graph(0)->setData(qv_x, qv_y);
+    ui->plot->replot();
+    ui->plot->update();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    mostrarDatos();
+    ui->plot->xAxis->setRange(ui->doubleSpinBox_xmin->value(), ui->doubleSpinBox_xmax->value());
+    ui->plot->yAxis->setRange(ui->doubleSpinBox_ymin->value(), ui->doubleSpinBox_ymax->value());
+    plot();
 }

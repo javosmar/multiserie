@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport sql
+QT       += core gui serialport sql printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    duthread.cpp
+    duthread.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
-    duthread.h
+    duthread.h \
+    qcustomplot.h
 
 FORMS    += mainwindow.ui
 
