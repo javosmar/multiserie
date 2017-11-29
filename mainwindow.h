@@ -16,12 +16,14 @@ namespace Ui {
 class MainWindow;
 }
 
+class DuThread;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void crearTablaUsuarios();
@@ -49,6 +51,7 @@ private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
     QSqlDatabase db;
+    DuThread *mThread;
 };
 
 #endif // MAINWINDOW_H

@@ -13,8 +13,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    duthread.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    duthread.h
 
 FORMS    += mainwindow.ui
+
+QMAKE_CXXFLAGS += -std=gnu++14

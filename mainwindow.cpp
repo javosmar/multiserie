@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "duthread.h"
 
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
-int contador = 0;
 QString validez, latitud, longitud, velocidad, pulsacion;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -10,6 +10,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    mThread = new DuThread(10,this);
+    connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
+
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
@@ -129,9 +132,11 @@ void MainWindow::Serial_Conect()
         ui->serie_actualizar->setEnabled(false);
         ui->serie_desconectar->setEnabled(true);
         serial->write("A");
+        mThread->start(QThread::LowPriority);
     }
-    else
+    else{
         Serial_Error();
+    }
 }
 
 void MainWindow::Serial_Desconect()
@@ -143,6 +148,7 @@ void MainWindow::Serial_Desconect()
     ui->serie_combo->setEnabled(true);
     ui->serie_actualizar->setEnabled(true);
     ui->serie_desconectar->setEnabled(false);
+    mThread->terminate();
 }
 
 void MainWindow::Serial_Error()
@@ -163,10 +169,6 @@ void MainWindow::Serial_Pedir()
         pulsacion = serial->read(1);
         insertarUsuario();
         mostrarDatos();
-        contador++;
-        ui->progressBarserie->setValue(contador);
-        if(contador > 99)
-            contador = 0;
     }
 }
 
