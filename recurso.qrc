@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>cancha.JPG</file>
+        <file>futbol_pitch_green.png</file>
+        <file>campo_futbol_BN.jpg</file>
+        <file>cancha_pasto.jpg</file>
+    </qresource>
+</RCC>

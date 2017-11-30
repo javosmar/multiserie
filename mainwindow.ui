@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1577</width>
+    <width>1020</width>
     <height>816</height>
    </rect>
   </property>
@@ -131,17 +131,17 @@
    <widget class="QCustomPlot" name="plot" native="true">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>50</x>
       <y>220</y>
-      <width>561</width>
-      <height>521</height>
+      <width>901</width>
+      <height>501</height>
      </rect>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>780</x>
@@ -254,14 +254,9 @@
      </item>
     </layout>
    </widget>
+   <zorder>layoutWidget</zorder>
    <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>doubleSpinBox_xmax</zorder>
-   <zorder>doubleSpinBox_xmin</zorder>
-   <zorder>doubleSpinBox_ymax</zorder>
-   <zorder>doubleSpinBox_ymin</zorder>
-   <zorder>label</zorder>
-   <zorder>label_2</zorder>
    <zorder>plot</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -269,7 +264,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1577</width>
+     <width>1020</width>
      <height>20</height>
     </rect>
    </property>

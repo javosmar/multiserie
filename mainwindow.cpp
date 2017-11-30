@@ -5,6 +5,8 @@
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 QString validez, latitud, longitud, velocidad, pulsacion;
 
+QImage fondo;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -12,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     mThread = new DuThread(10,this);
     connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
+
 
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
@@ -22,11 +25,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //-----Plot----
     ui->plot->addGraph();
-    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
+    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssDisc);
     ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
+
+    fondo.load(":/futbol_pitch_green.png");
+    ui->plot->setBackground(fondo);
+
+    //ui->plot->setWindowOpacity(0.0);
+    ui->plot->xAxis->setVisible(false);
+    ui->plot->yAxis->setVisible(false);
     ui->plot->xAxis->setRange(3144887,3144935);
     ui->plot->yAxis->setRange(6030912,6030966);
-
     ui->doubleSpinBox_xmin->setValue(3144887);
     ui->doubleSpinBox_xmax->setValue(3144935);
     ui->doubleSpinBox_ymin->setValue(6030912);
