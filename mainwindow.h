@@ -12,6 +12,8 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 
+#include <QGeoCoordinate>
+
 namespace Ui {
 class MainWindow;
 }
@@ -53,7 +55,9 @@ private slots:
 
     void on_serie_desconectar_clicked();
 
-    void on_pushButton_clicked();
+    void on_pushButtonmostrar_clicked();
+
+    void coordenadas(QString, QString, QString, QString);
 
 private:
     Ui::MainWindow *ui;

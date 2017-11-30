@@ -1,10 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "duthread.h"
+#include "math.h"
 
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 QString validez, latitud, longitud, velocidad, pulsacion;
-
+float m1, n1, m2, n2, m3, n3, m4, n4;  //esquinas mapeadas
 QImage fondo;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,34 +15,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     mThread = new DuThread(10,this);
     connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
-
-
+    //----Serial----
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
             ui->serie_combo->insertItem(0,info.portName());
     }
     ui->serie_desconectar->setEnabled(false);
-
     //-----Plot----
     ui->plot->addGraph();
     ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssDisc);
-    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
-
+    ui->plot->graph(0)->setLineStyle(QCPGraph::lsLine);//::lsNone);
     fondo.load(":/futbol_pitch_green.png");
     ui->plot->setBackground(fondo);
-
-    //ui->plot->setWindowOpacity(0.0);
     ui->plot->xAxis->setVisible(false);
     ui->plot->yAxis->setVisible(false);
-    ui->plot->xAxis->setRange(3144887,3144935);
-    ui->plot->yAxis->setRange(6030912,6030966);
-    ui->doubleSpinBox_xmin->setValue(3144887);
-    ui->doubleSpinBox_xmax->setValue(3144935);
-    ui->doubleSpinBox_ymin->setValue(6030912);
-    ui->doubleSpinBox_ymax->setValue(6030966);
     //------SQL------
-    qDebug() << "Iniciado";
     QString nombre;
     nombre.append("base_datos.sqlite");
     db = QSqlDatabase::addDatabase("QSQLITE");
@@ -186,14 +175,11 @@ void MainWindow::Serial_Pedir()
 {
     if(serial->bytesAvailable() >= 28){
         validez = serial->read(1);
-        latitud = QString::number(serial->read(8).append("e+3").toDouble(&ok),'f');
-        QString perdido = serial->read(2);
-        longitud = QString::number(serial->read(9).append("e+3").toDouble(&ok),'f');
-        perdido = serial->read(2);
+        latitud = QString::number(serial->read(10).append("e-2").toDouble(&ok),'f');
+        longitud = QString::number(serial->read(11).append("e-2").toDouble(&ok),'f');
         velocidad = serial->read(5);
         pulsacion = serial->read(1);
         insertarUsuario();
-        //mostrarDatos();
     }
 }
 
@@ -209,7 +195,6 @@ void MainWindow::on_serie_combo_activated(const QString &arg1)
 {
     Serial_Conf();
     Serial_Conect();
-
 }
 
 void MainWindow::on_serie_desconectar_clicked()
@@ -237,10 +222,46 @@ void MainWindow::plot()
     ui->plot->update();
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pushButtonmostrar_clicked()
 {
+    coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
     mostrarDatos();
-    ui->plot->xAxis->setRange(ui->doubleSpinBox_xmin->value(), ui->doubleSpinBox_xmax->value());
-    ui->plot->yAxis->setRange(ui->doubleSpinBox_ymin->value(), ui->doubleSpinBox_ymax->value());
     plot();
+}
+
+void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString esq4)
+{
+    //----corners----
+    //-31,747159, -60,515733
+    //separación de coordenadas reales
+    esq1.replace(",", ".");
+    esq2.replace(",", ".");
+    esq3.replace(",", ".");
+    esq4.replace(",", ".");
+    float x1 = esq1.right(9).toFloat(&ok);
+    esq1.chop(12);
+    float y1 = esq1.right(9).toFloat(&ok);
+    float x2 = esq2.right(9).toFloat(&ok);
+    esq2.chop(12);
+    float y2 = esq2.right(9).toFloat(&ok);
+    float x3 = esq3.right(9).toFloat(&ok);
+    esq3.chop(12);
+    float y3 = esq3.right(9).toFloat(&ok);
+    float x4 = esq4.right(9).toFloat(&ok);
+    esq4.chop(12);
+    float y4 = esq4.right(9).toFloat(&ok);
+    //mapeo de las esquinas
+    m1 = x1;
+    n1 = y1;
+    m2 = m1;
+    n2 = sqrt(pow((x2-x1),2)+pow((y2-y1),2)) + n1;
+    m3 = sqrt(pow((x3-x2),2)+pow((y3-y2),2)) + m1;
+    n3 = n2;
+    m4 = m3;
+    n4 = n1;
+    //disposición de los límites de los ejes
+    ui->plot->xAxis->setRange(m1,m4);
+    qDebug() << m1 << n1 << m2 << n2 << m3 << n3 << m4 << n4;
+    ui->plot->yAxis->setRange(n1,n2);
+    //mostrarDatos();
 }
