@@ -12,8 +12,6 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 
-#include <QGeoCoordinate>
-
 namespace Ui {
 class MainWindow;
 }

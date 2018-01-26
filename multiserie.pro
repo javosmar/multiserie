@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport sql printsupport positioning
+QT       += core gui serialport sql printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

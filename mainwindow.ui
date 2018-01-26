@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1576</width>
+    <width>1017</width>
     <height>816</height>
    </rect>
   </property>
@@ -141,11 +141,11 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>20</y>
+      <x>770</x>
+      <y>50</y>
       <width>231</width>
       <height>171</height>
      </rect>
@@ -251,21 +251,13 @@
    <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>plot</zorder>
-   <zorder>label</zorder>
-   <zorder>label_2</zorder>
-   <zorder>label_3</zorder>
-   <zorder>label_4</zorder>
-   <zorder>lineEditcorner1</zorder>
-   <zorder>lineEditcorner2</zorder>
-   <zorder>lineEditcorner3</zorder>
-   <zorder>lineEditcorner4</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1576</width>
+     <width>1017</width>
      <height>20</height>
     </rect>
    </property>
