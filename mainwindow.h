@@ -57,6 +57,10 @@ private slots:
 
     void coordenadas(QString, QString, QString, QString);
 
+    double Mapeo_x(double, double);
+
+    double Mapeo_y(double, double);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
