@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1017</width>
+    <width>1245</width>
     <height>816</height>
    </rect>
   </property>
@@ -144,8 +144,8 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>770</x>
-      <y>50</y>
+      <x>760</x>
+      <y>20</y>
       <width>231</width>
       <height>171</height>
      </rect>
@@ -247,17 +247,42 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>310</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Agregar punto</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditpunto">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>270</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>plot</zorder>
+   <zorder>pushButton</zorder>
+   <zorder>lineEditpunto</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1017</width>
+     <width>1245</width>
      <height>20</height>
     </rect>
    </property>

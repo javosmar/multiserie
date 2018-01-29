@@ -5,7 +5,7 @@
 
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 QString validez, latitud, longitud, velocidad, pulsacion;
-double fi, alfa, X1, Y1, m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima;  //esquinas mapeadas
+double fi_rad, alfa_rad, X1, Y1, m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima;  //esquinas mapeadas
 QImage fondo;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->serie_desconectar->setEnabled(false);
     //-----Plot----
     ui->plot->addGraph();
-    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
+    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCross);//::ssCircle);
     ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
     fondo.load(":/futbol_pitch_green.png");
     ui->plot->setBackground(fondo);
@@ -44,10 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
     crearTablaUsuarios();
     mostrarDatos();
     //--------------
-    ui->lineEditcorner1->setText("-31,747317, -60,514680");
-    ui->lineEditcorner2->setText("-31,747910, -60,514836");
-    ui->lineEditcorner3->setText("-31,747741, -60,515855");
-    ui->lineEditcorner4->setText("-31,747162, -60,515723");
+        ui->lineEditcorner1->setText("-31,747308, -60,514664");
+        ui->lineEditcorner2->setText("-31,747931, -60,514819");
+        ui->lineEditcorner3->setText("-31,747757, -60,515908");
+        ui->lineEditcorner4->setText("-31,747135, -60,515763");
+//    ui->lineEditcorner1->setText("-31,747317, -60,514680");
+//    ui->lineEditcorner2->setText("-31,747910, -60,514836");
+//    ui->lineEditcorner3->setText("-31,747741, -60,515855");
+//    ui->lineEditcorner4->setText("-31,747162, -60,515723");
 }
 
 MainWindow::~MainWindow()
@@ -231,10 +235,10 @@ void MainWindow::plot()
 
 void MainWindow::on_pushButtonmostrar_clicked()
 {
-    ui->lineEditcorner1->setText("-31,747307, -60,514661");
-    ui->lineEditcorner2->setText("-31,747927, -60,514824");
-    ui->lineEditcorner3->setText("-31,747754, -60,515868");
-    ui->lineEditcorner4->setText("-31,747145, -60,515731");
+//    ui->lineEditcorner1->setText("-31,747307, -60,514661");
+//    ui->lineEditcorner2->setText("-31,747927, -60,514824");
+//    ui->lineEditcorner3->setText("-31,747754, -60,515868");
+//    ui->lineEditcorner4->setText("-31,747145, -60,515731");
 
     coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
     //mostrarDatos();
@@ -264,25 +268,29 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     double y4 = esq4.right(9).toDouble(&ok);
 
     //puntos de prueba -31,747497, -60,515556 - -31,747274, -60,515765 - -31,747367, -60,515261 - -31,747449, -60,514746
-    double x5 = 60.5155;
-    double y5 = 31.7474;
-    double x6 = 60.5157;
-    double y6 = 31.7472;
-    double x7 = 60.5152;
-    double y7 = 31.7473;
-    double x8 = 60.5147;
-    double y8 = 31.7474;
+//    double x5 = 60.5155;
+//    double y5 = 31.7474;
+//    double x6 = 60.5157;
+//    double y6 = 31.7472;
+//    double x7 = 60.5152;
+//    double y7 = 31.7473;
+//    double x8 = 60.5147;
+//    double y8 = 31.7474;
 
     //mapeo de las esquinas
 
     //cálculo del ángulo entre rectas
     qDebug() << X1 << Y1 << x2 << y2 << x3 << y3 << x4 << y4;
-    fi = acos((y2 - Y1) / (sqrt(pow((y2 - Y1),2) + pow((X1 - x2),2))));
+    float coseno = (y2 - Y1) / (sqrt(pow((y2 - Y1),2) + pow((X1 - x2),2)));
+    fi_rad = qAcos(coseno);
+    float fi_deg = qRadiansToDegrees(qAcos(coseno));
+            //acos(coseno);// - 0.11;                      //compensación del ángulo entre sistemas 0.11 alineado horizontal
     if((X1 - x2) < 0)
-        alfa = -fi;
+        alfa_rad = -fi_rad;
     else
-        alfa = fi;
+        alfa_rad = fi_rad;
 
+    qDebug() << coseno << fi_rad << alfa_rad << fi_deg;
     //coordenadas en el nuevo sistema
     //esquinas
     m1 = 0;
@@ -293,37 +301,60 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     n3 = Mapeo_y(x3,y3);
     m4 = Mapeo_x(x4,y4);
     n4 = Mapeo_y(x4,y4);
+    qDebug() << m1 << n1 << m2 << n2 << m3 << n3 << m4 << n4;
 
     //puntos de prueba mapeados
-    m5 = Mapeo_x(x5,y5);
-    n5 = Mapeo_y(x5,y5);
-    m6 = Mapeo_x(x6,y6);
-    n6 = Mapeo_y(x6,y6);
-    m7 = Mapeo_x(x7,y7);
-    n7 = Mapeo_y(x7,y7);
-    m8 = Mapeo_x(x8,y8);
-    n8 = Mapeo_y(x8,y8);
+//    m5 = Mapeo_x(x5,y5);
+//    n5 = Mapeo_y(x5,y5);
+//    m6 = Mapeo_x(x6,y6);
+//    n6 = Mapeo_y(x6,y6);
+//    m7 = Mapeo_x(x7,y7);
+//    n7 = Mapeo_y(x7,y7);
+//    m8 = Mapeo_x(x8,y8);
+//    n8 = Mapeo_y(x8,y8);
 
     //disposición de los límites de los ejes
     ui->plot->xAxis->setRange(m1,m4);
     ui->plot->yAxis->setRange(n1,n2);
-
+//    ui->plot->xAxis->setRange(X1-0.00005,x3+0.00005);
+//    ui->plot->yAxis->setRange(y4-0.00005,y2+0.00005);
+    clearData();
+//    addPoint(X1,Y1);
+//    addPoint(x2,y2);
+//    addPoint(x3,y3);
+//    addPoint(x4,y4);
     //mostrarDatos();
-    addPoint(m5,n5);
-    addPoint(m6,n6);
-    addPoint(m7,n7);
-    addPoint(m8,n8);
+    addPoint(m1,n1);
+    addPoint(m2,n2);
+    addPoint(m3,n3);
+    addPoint(m4,n4);
     plot();
 }
 
 double MainWindow::Mapeo_x(double x, double y)
 {
-    xprima = (y - Y1)*sin(alfa) - (X1 - x)*cos(alfa);
+    xprima = (y - Y1)*sin(alfa_rad) - (X1 - x)*cos(alfa_rad);
     return xprima;
 }
 
 double MainWindow::Mapeo_y(double x, double y)
 {
-    yprima = (X1 - x + (y - Y1)*sin(alfa)*cos(alfa) - (X1 - x)*pow(cos(alfa),2)) / sin(alfa);
+    yprima = (X1 - x + (y - Y1)*qSin(alfa_rad)*qCos(alfa_rad) - (X1 - x)*pow(cos(alfa_rad),2)) / qSin(alfa_rad);
+    yprima = yprima - xprima * tan(0.085);
     return yprima;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString punto_nuevo = ui->lineEditpunto->text();
+    punto_nuevo.replace(",", ".");
+    double x5 = punto_nuevo.right(9).toDouble(&ok);
+    punto_nuevo.chop(12);
+    double y5 = punto_nuevo.right(9).toDouble(&ok);
+    m5 = Mapeo_x(x5,y5);
+    n5 = Mapeo_y(x5,y5);
+//    addPoint(x5,y5);
+//    qDebug() << m5 << n5;
+    addPoint(m5,n5);
+    plot();
 }
