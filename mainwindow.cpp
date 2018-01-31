@@ -5,7 +5,8 @@
 
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 QString validez, latitud, longitud, velocidad, pulsacion;
-double fi_rad, alfa_rad, X1, Y1, m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima;  //esquinas mapeadas
+double fi_rad, alfa_rad;
+int m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima, X1, Y1;  //esquinas mapeadas
 QImage fondo;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -123,12 +124,12 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        double x = mostrar.value(3).toDouble(&ok);
-        double y = mostrar.value(2).toDouble(&ok);
+        int x = mostrar.value(3).toInt(&ok);
+        int y = mostrar.value(2).toInt(&ok);
         double m = Mapeo_x(x,y);
         double n = Mapeo_y(x,y);
         addPoint(m, n);
-        qDebug() << mostrar.value(3).toDouble(&ok) << mostrar.value(2).toDouble(&ok);
+        qDebug() << x << y << mostrar.value(3).toInt(&ok) << mostrar.value(2).toInt(&ok);
         fila++;
     }
     plot();
@@ -184,8 +185,8 @@ void MainWindow::Serial_Pedir()
 {
     if(serial->bytesAvailable() >= 28){
         validez = serial->read(1);
-        latitud = QString::number(serial->read(10).append("e-2").toDouble(&ok),'f');
-        longitud = QString::number(serial->read(11).append("e-2").toDouble(&ok),'f');
+        latitud = QString::number(serial->read(8).toInt(&ok));//.toDouble(&ok));
+        longitud = QString::number(serial->read(8).toInt(&ok));//.toDouble(&ok));
         qDebug() << latitud << longitud;
         velocidad = serial->read(5);
         pulsacion = serial->read(1);
@@ -244,29 +245,29 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     //----corners----
     //-31,747159, -60,515733
     //separación de coordenadas reales
-    esq1.replace(",", ".");
-    esq2.replace(",", ".");
-    esq3.replace(",", ".");
-    esq4.replace(",", ".");
-    X1 = esq1.right(9).toDouble(&ok);
-    esq1.chop(12);
-    Y1 = esq1.right(9).toDouble(&ok);
-    double x2 = esq2.right(9).toDouble(&ok);
-    esq2.chop(12);
-    double y2 = esq2.right(9).toDouble(&ok);
-    double x3 = esq3.right(9).toDouble(&ok);
-    esq3.chop(12);
-    double y3 = esq3.right(9).toDouble(&ok);
-    double x4 = esq4.right(9).toDouble(&ok);
-    esq4.chop(12);
-    double y4 = esq4.right(9).toDouble(&ok);
+    esq1.remove(QChar(','),Qt::CaseInsensitive);//.replace(",", ".");
+    esq2.remove(QChar(','),Qt::CaseInsensitive);
+    esq3.remove(QChar(','),Qt::CaseInsensitive);
+    esq4.remove(QChar(','),Qt::CaseInsensitive);
+    qDebug() << esq1 << esq2 << esq3 << esq4;
+    X1 = esq1.right(8).toInt(&ok);
+    esq1.chop(10);
+    Y1 = esq1.right(8).toInt(&ok);
+    int x2 = esq2.right(8).toInt(&ok);
+    esq2.chop(10);
+    int y2 = esq2.right(8).toInt(&ok);
+    int x3 = esq3.right(8).toInt(&ok);
+    esq3.chop(10);
+    int y3 = esq3.right(8).toInt(&ok);
+    int x4 = esq4.right(8).toInt(&ok);
+    esq4.chop(10);
+    int y4 = esq4.right(8).toInt(&ok);
+    qDebug() << X1 << Y1 << x2 << y2 << x3 << y3 << x4 << y4;
 
     //mapeo de las esquinas
     //cálculo del ángulo entre rectas
     float coseno = (y2 - Y1) / (sqrt(pow((y2 - Y1),2) + pow((X1 - x2),2)));
     fi_rad = qAcos(coseno);
-    float fi_deg = qRadiansToDegrees(qAcos(coseno));
-            //acos(coseno);// - 0.11;                      //compensación del ángulo entre sistemas 0.11 alineado horizontal
     if((X1 - x2) < 0)
         alfa_rad = -fi_rad;
     else
@@ -311,14 +312,12 @@ double MainWindow::Mapeo_y(double x, double y)
 void MainWindow::on_pushButton_clicked()
 {
     QString punto_nuevo = ui->lineEditpunto->text();
-    punto_nuevo.replace(",", ".");
-    double x5 = punto_nuevo.right(9).toDouble(&ok);
-    punto_nuevo.chop(12);
-    double y5 = punto_nuevo.right(9).toDouble(&ok);
+    punto_nuevo.remove(QChar(','),Qt::CaseInsensitive);
+    int x5 = punto_nuevo.right(8).toInt(&ok);
+    punto_nuevo.chop(10);
+    int y5 = punto_nuevo.right(8).toInt(&ok);
     m5 = Mapeo_x(x5,y5);
     n5 = Mapeo_y(x5,y5);
-//    addPoint(x5,y5);
-//    qDebug() << m5 << n5;
     addPoint(m5,n5);
     plot();
 }
