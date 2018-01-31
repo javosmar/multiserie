@@ -129,7 +129,9 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
         double x = mostrar.value(3).toDouble(&ok);
         double y = mostrar.value(2).toDouble(&ok);
-        addPoint(x, y);
+        double m = Mapeo_x(x,y);
+        double n = Mapeo_y(x,y);
+        addPoint(m, n);
         qDebug() << mostrar.value(3).toDouble(&ok) << mostrar.value(2).toDouble(&ok);
         fila++;
     }
@@ -241,7 +243,7 @@ void MainWindow::on_pushButtonmostrar_clicked()
 //    ui->lineEditcorner4->setText("-31,747145, -60,515731");
 
     coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
-    //mostrarDatos();
+    mostrarDatos();
     plot();
 }
 
