@@ -11,6 +11,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
+#include <QColormap>
 
 namespace Ui {
 class MainWindow;
@@ -62,6 +63,10 @@ private slots:
     double Mapeo_y(double, double);
 
     void on_pushButton_clicked();
+
+    void contador(void);
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::MainWindow *ui;

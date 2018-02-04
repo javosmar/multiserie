@@ -9,6 +9,11 @@ double fi_rad, alfa_rad;
 int m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima, X1, Y1;  //esquinas mapeadas
 QImage fondo;
 
+int cont_rep;
+int vector[1500][1500], vector2[110][64];
+QCPColorScale *colorScale;
+double max = 0;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -25,12 +30,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->serie_desconectar->setEnabled(false);
     //-----Plot----
     ui->plot->addGraph();
-    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCross);//::ssCircle);
-    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
-    fondo.load(":/futbol_pitch_green.png");
-    ui->plot->setBackground(fondo);
-    ui->plot->xAxis->setVisible(false);
-    ui->plot->yAxis->setVisible(false);
+    colorScale = new QCPColorScale(ui->plot);
+    ui->plot->plotLayout()->addElement(0, 1, colorScale);
+    colorScale->axis()->setRange(QCPRange(0,max));
+//    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCross);//::ssCircle);
+//    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
+//    fondo.load(":/futbol_pitch_green.png");
+//    ui->plot->setBackground(fondo);
+//    ui->plot->xAxis->setVisible(false);
+//    ui->plot->yAxis->setVisible(false);
     //------SQL------
     QString nombre;
     nombre.append("base_datos.sqlite");
@@ -43,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << "error al abrir base de datos";
     }
     crearTablaUsuarios();
-    mostrarDatos();
+//    mostrarDatos();
     //--------------
     ui->lineEditcorner1->setText("-31,747308, -60,514664");
     ui->lineEditcorner2->setText("-31,747931, -60,514819");
@@ -96,15 +104,22 @@ void MainWindow::insertarUsuario()
     QSqlQuery insertar;
     insertar.prepare(consulta);
     if(insertar.exec()){
-        //qDebug() << "usuario agregado correctamente";
+//        qDebug() << "usuario agregado correctamente";
     }
     else{
-        //qDebug() << "ERROR! " << insertar.lastError();
+//        qDebug() << "ERROR! " << insertar.lastError();
     }
 }
 
 void MainWindow::mostrarDatos()
 {
+    for(int indice=0;indice<1500;indice++)
+        for(int jndice=0;jndice<1500;jndice++)
+            vector[indice][jndice] = 0;
+    for(int indice=0;indice<110;indice++)
+        for(int jndice=0;jndice<64;jndice++)
+            vector2[indice][jndice] = 0;
+    cont_rep = 0;
     QString consulta;
     consulta.append("SELECT * FROM jugador");
     QSqlQuery mostrar;
@@ -124,12 +139,18 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
+        if(mostrar.value(1) == "B")
+            cont_rep++;
         int x = mostrar.value(3).toInt(&ok);
         int y = mostrar.value(2).toInt(&ok);
-        double m = Mapeo_x(x,y);
-        double n = Mapeo_y(x,y);
+        int m = Mapeo_x(x,y);
+        int n = Mapeo_y(x,y);
         addPoint(m, n);
-        qDebug() << x << y << mostrar.value(3).toInt(&ok) << mostrar.value(2).toInt(&ok);
+        int j = m / 30;
+        int k = n / 30;
+        vector[m][n] = vector[m][n] + 1;
+        vector2[j][k] = vector2[j][k] + 1;
+        qDebug() << j << k << vector2[j][k];
         fila++;
     }
     plot();
@@ -211,7 +232,7 @@ void MainWindow::on_serie_combo_activated(const QString &arg1)
 void MainWindow::on_serie_desconectar_clicked()
 {
     Serial_Desconect();
-    mostrarDatos();
+//    mostrarDatos();
 }
 
 void MainWindow::addPoint(double x, double y)
@@ -228,7 +249,52 @@ void MainWindow::clearData()
 
 void MainWindow::plot()
 {
-    ui->plot->graph(0)->setData(qv_x, qv_y);
+    // configure axis rect:
+    //ui->plot->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming
+    ui->plot->axisRect()->setupFullAxesBox(true);
+    // set up the QCPColorMap:
+    QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
+//    int nx = m4;
+//    int ny = n2;
+    int nx = 37;
+    int ny = 22;
+    colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
+    colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));//(m1, m4), QCPRange(n1, n2)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions now we assign some data, by accessing the QCPColorMapData instance of the color map:
+    double x, y, z;
+    max = 0;
+    for (int xIndex = 0; xIndex < nx; ++xIndex){
+      for (int yIndex = 0; yIndex < ny; ++yIndex){
+        colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
+        z = vector2[xIndex][yIndex];
+        if(vector2[xIndex][yIndex] > max)
+            max = vector2[xIndex][yIndex];
+        colorMap->data()->setCell(xIndex, yIndex, z);
+      }
+    }
+    // add a color scale:
+//    QCPColorScale *colorScale = new QCPColorScale(ui->plot);
+//    ui->plot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+//    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels right (actually atRight is already the default)
+    colorMap->setColorScale(colorScale); // associate the color map with the color scale
+    //    colorScale->axis()->setRange(QCPRange(0,max));
+    //colorScale->axis()->setLabel("Magnetic Field Strength");
+
+    // set the color gradient of the color map to one of the presets:
+    colorMap->setGradient(QCPColorGradient::gpHot); // we could have also created a QCPColorGradient instance and added own colors to the gradient, see the documentation of QCPColorGradient for what's possible.
+//    colorMap->setInterpolate(false);
+    // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
+    colorMap->rescaleDataRange();
+
+    // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->plot);
+    ui->plot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
+
+    // rescale the key (x) and value (y) axes so the whole color map is visible:
+    ui->plot->rescaleAxes();
+
+
+    //ui->plot->graph(0)->setData(qv_x, qv_y);
     ui->plot->replot();
     ui->plot->update();
 }
@@ -238,6 +304,7 @@ void MainWindow::on_pushButtonmostrar_clicked()
     coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
     mostrarDatos();
     plot();
+    qDebug() << cont_rep;
 }
 
 void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString esq4)
@@ -286,8 +353,8 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     qDebug() << m1 << n1 << m2 << n2 << m3 << n3 << m4 << n4;
 
     //disposición de los límites de los ejes
-    ui->plot->xAxis->setRange(m1,m4);
-    ui->plot->yAxis->setRange(n1,n2);
+//    ui->plot->xAxis->setRange(m1,m4);
+//    ui->plot->yAxis->setRange(n1,n2);
     clearData();
     addPoint(m1,n1);
     addPoint(m2,n2);
@@ -319,5 +386,34 @@ void MainWindow::on_pushButton_clicked()
     m5 = Mapeo_x(x5,y5);
     n5 = Mapeo_y(x5,y5);
     addPoint(m5,n5);
-    plot();
+    validez = "C";
+    latitud = QString::number(y5);
+    longitud = QString::number(x5);
+    velocidad = "0.321";
+    pulsacion = "@";
+    insertarUsuario();
+//    mostrarDatos();
+//    plot();
+//    qDebug() << x5 << y5 << m5 << n5;
+}
+
+void MainWindow::contador()
+{
+
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+//    -31,747308, -60,514664
+//    -31,747931, -60,514819
+//    -31,747757, -60,515908
+//    -31,747135, -60,515763
+    int aleatorioy = (qrand() % 622) + 747308;
+    int aleatoriox = (qrand() % 1098) + 514665;
+    QString punto;
+    punto.append("-31,");
+    punto.append(QString::number(aleatorioy));
+    punto.append(", -60,");
+    punto.append(QString::number(aleatoriox));
+    ui->lineEditpunto->setText(punto);
 }
