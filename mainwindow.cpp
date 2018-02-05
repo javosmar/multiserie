@@ -53,10 +53,21 @@ MainWindow::MainWindow(QWidget *parent) :
     crearTablaUsuarios();
 //    mostrarDatos();
     //--------------
-    ui->lineEditcorner1->setText("-31,747308, -60,514664");
-    ui->lineEditcorner2->setText("-31,747931, -60,514819");
-    ui->lineEditcorner3->setText("-31,747757, -60,515908");
-    ui->lineEditcorner4->setText("-31,747135, -60,515763");
+    //club Paraná
+//    ui->lineEditcorner1->setText("-31,747308, -60,514664");
+//    ui->lineEditcorner2->setText("-31,747931, -60,514819");
+//    ui->lineEditcorner3->setText("-31,747757, -60,515908");
+//    ui->lineEditcorner4->setText("-31,747135, -60,515763");
+    //casa
+    ui->lineEditcorner1->setText("-31,748118, -60,515155");
+    ui->lineEditcorner2->setText("-31,748958, -60,515475");
+    ui->lineEditcorner3->setText("-31,748782, -60,516285");
+    ui->lineEditcorner4->setText("-31,747961, -60,516121");
+    //club Patronato
+//    ui->lineEditcorner1->setText("-31,742903, -60,506960");
+//    ui->lineEditcorner2->setText("-31,743539, -60,507244");
+//    ui->lineEditcorner3->setText("-31,743193, -60,508320");
+//    ui->lineEditcorner4->setText("-31,742563, -60,508043");
 }
 
 MainWindow::~MainWindow()
@@ -206,10 +217,17 @@ void MainWindow::Serial_Pedir()
 {
     if(serial->bytesAvailable() >= 28){
         validez = serial->read(1);
-        latitud = QString::number(serial->read(8).toInt(&ok));//.toDouble(&ok));
-        longitud = QString::number(serial->read(8).toInt(&ok));//.toDouble(&ok));
+        latitud = serial->read(2);
+        int lat_minutos = serial->read(7).toInt(&ok) / 6;
+        latitud.append(QString::number(lat_minutos));
+        int basura = serial->read(1).toInt(&ok);
+        longitud = serial->read(2);
+        int lon_minutos = serial->read(7).toInt(&ok) / 6;
+        longitud.append(QString::number(lon_minutos));
+//        latitud = QString::number(serial->read(9).toInt(&ok));//.toDouble(&ok));
+//        longitud = QString::number(serial->read(9).toInt(&ok));//.toDouble(&ok));
         qDebug() << latitud << longitud;
-        velocidad = serial->read(5);
+        velocidad = serial->read(4);
         pulsacion = serial->read(1);
         insertarUsuario();
     }
