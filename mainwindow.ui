@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1245</width>
-    <height>816</height>
+    <height>909</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -133,8 +133,8 @@
      <rect>
       <x>50</x>
       <y>220</y>
-      <width>901</width>
-      <height>501</height>
+      <width>891</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -250,8 +250,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>310</y>
+      <x>1090</x>
+      <y>90</y>
       <width>80</width>
       <height>21</height>
      </rect>
@@ -263,8 +263,8 @@
    <widget class="QLineEdit" name="lineEditpunto">
     <property name="geometry">
      <rect>
-      <x>1010</x>
-      <y>270</y>
+      <x>1040</x>
+      <y>50</y>
       <width>171</width>
       <height>21</height>
      </rect>
@@ -273,14 +273,49 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>1040</x>
-      <y>360</y>
+      <x>1070</x>
+      <y>140</y>
       <width>80</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>rand</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="verticalSlider_max">
+    <property name="geometry">
+     <rect>
+      <x>1050</x>
+      <y>230</y>
+      <width>16</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>999</number>
+    </property>
+    <property name="sliderPosition">
+     <number>1</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_max">
+    <property name="geometry">
+     <rect>
+      <x>1100</x>
+      <y>350</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
    <zorder>layoutWidget</zorder>
@@ -290,6 +325,8 @@
    <zorder>pushButton</zorder>
    <zorder>lineEditpunto</zorder>
    <zorder>pushButton_2</zorder>
+   <zorder>verticalSlider_max</zorder>
+   <zorder>label_max</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

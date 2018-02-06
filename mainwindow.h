@@ -68,6 +68,8 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_verticalSlider_max_actionTriggered(int action);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;

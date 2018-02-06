@@ -32,10 +32,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->addGraph();
     colorScale = new QCPColorScale(ui->plot);
     ui->plot->plotLayout()->addElement(0, 1, colorScale);
-    colorScale->axis()->setRange(QCPRange(0,max));
+//    colorScale->axis()->setRange(QCPRange(0,max));
 //    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCross);//::ssCircle);
 //    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
-//    fondo.load(":/futbol_pitch_green.png");
+//    fondo.load("://soccer field.png");
 //    ui->plot->setBackground(fondo);
 //    ui->plot->xAxis->setVisible(false);
 //    ui->plot->yAxis->setVisible(false);
@@ -142,6 +142,7 @@ void MainWindow::mostrarDatos()
         qDebug() << "ERROR! " << mostrar.lastError();
     }
     int fila = 0;
+    max = 0;
     ui->tableWidgetdato->setRowCount(0);
     while(mostrar.next()){
         ui->tableWidgetdato->insertRow(fila);
@@ -150,18 +151,32 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        if(mostrar.value(1) == "B")
+        if(mostrar.value(1) == "b")
             cont_rep++;
         int x = mostrar.value(3).toInt(&ok);
         int y = mostrar.value(2).toInt(&ok);
         int m = Mapeo_x(x,y);
         int n = Mapeo_y(x,y);
         addPoint(m, n);
-        int j = m / 30;
-        int k = n / 30;
+        int j = m / 10;
+        int k = n / 10;
         vector[m][n] = vector[m][n] + 1;
         vector2[j][k] = vector2[j][k] + 1;
-        qDebug() << j << k << vector2[j][k];
+//        if((vector2[j][k] > max))
+//            max = vector2[j][k];
+        if((vector2[j][k] > max) && (ui->verticalSlider_max->value() == 1)){
+            max = vector2[j][k];
+            colorScale->axis()->setRange(QCPRange(0,max));
+        }
+        else{
+            max = ui->verticalSlider_max->value();
+            colorScale->axis()->setRange(QCPRange(0,ui->verticalSlider_max->value()));
+        }
+        if(vector2[j][k] > max)
+            vector2[j][k] = max;
+        ui->label_max->setText(QString::number(max));
+        ui->verticalSlider_max->setSliderPosition(max);
+//        qDebug() << j << k << vector2[j][k];
         fila++;
     }
     plot();
@@ -224,12 +239,10 @@ void MainWindow::Serial_Pedir()
         longitud = serial->read(2);
         int lon_minutos = serial->read(7).toInt(&ok) / 6;
         longitud.append(QString::number(lon_minutos));
-//        latitud = QString::number(serial->read(9).toInt(&ok));//.toDouble(&ok));
-//        longitud = QString::number(serial->read(9).toInt(&ok));//.toDouble(&ok));
-        qDebug() << latitud << longitud;
         velocidad = serial->read(4);
         pulsacion = serial->read(1);
         insertarUsuario();
+//        qDebug() << validez << latitud << longitud << velocidad << pulsacion;
     }
 }
 
@@ -274,21 +287,62 @@ void MainWindow::plot()
     QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
 //    int nx = m4;
 //    int ny = n2;
-    int nx = 37;
-    int ny = 22;
-    colorMap->data()->setSize(nx, ny); // we want the color map to have nx * ny data points
-    colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));//(m1, m4), QCPRange(n1, n2)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions now we assign some data, by accessing the QCPColorMapData instance of the color map:
+
+    int nx = 110;
+    int ny = 64;
     double x, y, z;
-    max = 0;
-    for (int xIndex = 0; xIndex < nx; ++xIndex){
-      for (int yIndex = 0; yIndex < ny; ++yIndex){
-        colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-        z = vector2[xIndex][yIndex];
-        if(vector2[xIndex][yIndex] > max)
-            max = vector2[xIndex][yIndex];
-        colorMap->data()->setCell(xIndex, yIndex, z);
-      }
+//    max = 0;
+    QImage *img = new QImage("://Captura.PNG");
+    if(img->isNull())
+        qDebug() << "Error al cargar el archivo de imagen";
+    else
+    {
+        int xindice = 0;
+        int yindice = 0;
+        int contx = 0;
+        int conty = 0;
+        colorMap->data()->setSize(771, 577); // we want the color map to have nx * ny data points
+        colorMap->data()->setRange(QCPRange(0, 771), QCPRange(0, 577));//(m1, m4), QCPRange(n1, n2)); // and span the coordinate range -4..4 in both key (x) and value (y) dimensions now we assign some data, by accessing the QCPColorMapData instance of the color map:
+
+        for (int xIndex = 0; xIndex < 770; xIndex++){
+
+          for (int yIndex = 0; yIndex < 576; yIndex++){
+            colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
+            double gris = ((double)qGray(img->pixel(xIndex,yIndex)));
+            if((gris > 250))// && (max > 0))
+                gris = max;
+            z = gris + vector2[xindice][yindice];
+//            qDebug() << xindice << yindice << contx << conty << xIndex << yIndex << vector2[xindice][yindice];
+//            if(vector2[xindice][yindice] > max)
+//                max = vector2[xindice][yindice];
+            colorMap->data()->setCell(x, y, z);
+            if(conty == 8){
+                conty = 0;
+                yindice++;
+            }
+            else
+                conty++;
+          }
+          yindice = 0;
+          if(contx == 6){
+              contx = 0;
+              xindice++;
+              yindice = 0;
+          }
+          else
+              contx++;
+        }
     }
+    qDebug() << max;
+//    for (int xIndex = 0; xIndex < nx; ++xIndex){
+//      for (int yIndex = 0; yIndex < ny; ++yIndex){
+//        colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
+//        z = vector2[xIndex][yIndex];
+//        if(vector2[xIndex][yIndex] > max)
+//            max = vector2[xIndex][yIndex];
+//        colorMap->data()->setCell(xIndex, yIndex, z);
+//      }
+//    }
     // add a color scale:
 //    QCPColorScale *colorScale = new QCPColorScale(ui->plot);
 //    ui->plot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
@@ -298,8 +352,9 @@ void MainWindow::plot()
     //colorScale->axis()->setLabel("Magnetic Field Strength");
 
     // set the color gradient of the color map to one of the presets:
-    colorMap->setGradient(QCPColorGradient::gpHot); // we could have also created a QCPColorGradient instance and added own colors to the gradient, see the documentation of QCPColorGradient for what's possible.
-//    colorMap->setInterpolate(false);
+    colorMap->setGradient(QCPColorGradient::gpGrayscale); // we could have also created a QCPColorGradient instance and added own colors to the gradient, see the documentation of QCPColorGradient for what's possible.
+
+    //    colorMap->setInterpolate(false);
     // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
     colorMap->rescaleDataRange();
 
@@ -312,6 +367,7 @@ void MainWindow::plot()
     ui->plot->rescaleAxes();
 
 
+
     //ui->plot->graph(0)->setData(qv_x, qv_y);
     ui->plot->replot();
     ui->plot->update();
@@ -321,8 +377,7 @@ void MainWindow::on_pushButtonmostrar_clicked()
 {
     coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
     mostrarDatos();
-    plot();
-    qDebug() << cont_rep;
+    //plot();
 }
 
 void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString esq4)
@@ -334,7 +389,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     esq2.remove(QChar(','),Qt::CaseInsensitive);
     esq3.remove(QChar(','),Qt::CaseInsensitive);
     esq4.remove(QChar(','),Qt::CaseInsensitive);
-    qDebug() << esq1 << esq2 << esq3 << esq4;
     X1 = esq1.right(8).toInt(&ok);
     esq1.chop(10);
     Y1 = esq1.right(8).toInt(&ok);
@@ -347,7 +401,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     int x4 = esq4.right(8).toInt(&ok);
     esq4.chop(10);
     int y4 = esq4.right(8).toInt(&ok);
-    qDebug() << X1 << Y1 << x2 << y2 << x3 << y3 << x4 << y4;
 
     //mapeo de las esquinas
     //cálculo del ángulo entre rectas
@@ -368,7 +421,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     n3 = Mapeo_y(x3,y3);
     m4 = Mapeo_x(x4,y4);
     n4 = Mapeo_y(x4,y4);
-    qDebug() << m1 << n1 << m2 << n2 << m3 << n3 << m4 << n4;
 
     //disposición de los límites de los ejes
 //    ui->plot->xAxis->setRange(m1,m4);
@@ -378,7 +430,7 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     addPoint(m2,n2);
     addPoint(m3,n3);
     addPoint(m4,n4);
-    plot();
+    //plot();
 }
 
 double MainWindow::Mapeo_x(double x, double y)
@@ -434,4 +486,9 @@ void MainWindow::on_pushButton_2_clicked()
     punto.append(", -60,");
     punto.append(QString::number(aleatoriox));
     ui->lineEditpunto->setText(punto);
+}
+
+void MainWindow::on_verticalSlider_max_actionTriggered(int action)
+{
+    ui->label_max->setText(QString::number(ui->verticalSlider_max->value()));
 }
