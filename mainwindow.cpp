@@ -32,25 +32,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->plot->addGraph();
     colorScale = new QCPColorScale(ui->plot);
     ui->plot->plotLayout()->addElement(0, 1, colorScale);
-//    colorScale->axis()->setRange(QCPRange(0,max));
-//    ui->plot->graph(0)->setScatterStyle(QCPScatterStyle::ssCross);//::ssCircle);
-//    ui->plot->graph(0)->setLineStyle(QCPGraph::lsNone);
-//    fondo.load("://soccer field.png");
-//    ui->plot->setBackground(fondo);
-//    ui->plot->xAxis->setVisible(false);
-//    ui->plot->yAxis->setVisible(false);
     //------SQL------
-    QString nombre;
-    nombre.append("base_datos.sqlite");
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(nombre);
-    if(db.open()){
-        qDebug() << "base de datos iniciada";
-    }
-    else{
-        qDebug() << "error al abrir base de datos";
-    }
-    crearTablaUsuarios();
+//    QString nombre;
+//    nombre.append("base_datos.sqlite");
+//    db = QSqlDatabase::addDatabase("QSQLITE");
+//    db.setDatabaseName(nombre);
+//    if(db.open()){
+//        qDebug() << "base de datos iniciada";
+//    }
+//    else{
+//        qDebug() << "error al abrir base de datos";
+//    }
+//    crearTablaUsuarios();
 //    mostrarDatos();
     //--------------
     //club Paraná
@@ -90,10 +83,12 @@ void MainWindow::crearTablaUsuarios()
     crear.prepare(consulta);
     if(crear.exec()){
         qDebug() << "tabla creada correctamente";
+        crear.clear();
     }
     else{
         qDebug() << "ERROR! " << crear.lastError();
     }
+    crear.clear();
 }
 
 void MainWindow::insertarUsuario()
@@ -116,10 +111,40 @@ void MainWindow::insertarUsuario()
     insertar.prepare(consulta);
     if(insertar.exec()){
 //        qDebug() << "usuario agregado correctamente";
+        insertar.clear();
     }
     else{
 //        qDebug() << "ERROR! " << insertar.lastError();
     }
+    mostrarTabla();
+    insertar.clear();
+}
+
+void MainWindow::mostrarTabla()
+{
+    QString consulta;
+    consulta.append("SELECT * FROM jugador");
+    QSqlQuery mostrar;
+    mostrar.prepare(consulta);
+    if(mostrar.exec()){
+        //qDebug() << "consulta realizada con exito";
+    }
+    else{
+        qDebug() << "ERROR! " << mostrar.lastError();
+    }
+    int fila = 0;
+    ui->tableWidgetdato->setRowCount(0);
+    while(mostrar.next()){
+        ui->tableWidgetdato->insertRow(fila);
+        ui->tableWidgetdato->setItem(fila,0,new QTableWidgetItem(mostrar.value(1).toByteArray().constData()));
+        ui->tableWidgetdato->setItem(fila,1,new QTableWidgetItem(mostrar.value(2).toByteArray().constData()));
+        ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
+        ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
+        ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
+        fila++;
+    }
+    consulta.clear();
+    mostrar.clear();
 }
 
 void MainWindow::mostrarDatos()
@@ -180,6 +205,7 @@ void MainWindow::mostrarDatos()
         fila++;
     }
     plot();
+    mostrar.clear();
 }
 
 void MainWindow::Serial_Conf()
@@ -491,4 +517,51 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_verticalSlider_max_actionTriggered(int action)
 {
     ui->label_max->setText(QString::number(ui->verticalSlider_max->value()));
+}
+
+void MainWindow::on_action_Open_triggered()
+{
+    QString nombre = QFileDialog::getOpenFileName(
+                this,
+                "GPSport - Open File",
+                "/Users/javos/Desktop/casa",
+                "Databases (*.sqlite);;All files (*.*)");
+    if(!nombre.isEmpty()){
+        qDebug() << "existe";
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(nombre);
+        if(db.open()){
+            qDebug() << "base de datos iniciada";
+        }
+        else{
+            qDebug() << "error al abrir base de datos";
+        }
+        crearTablaUsuarios();
+        mostrarTabla();
+    }
+    else{
+        qDebug() << "no existe";
+    }
+}
+
+void MainWindow::on_actionNew_triggered()
+{
+    QString nombre = QFileDialog::getSaveFileName(
+                this,
+                "GPSport - Nueva base de datos",
+                "/Users/javos/Desktop/casa",
+                "Databases (*.sqlite);;All Files (*.*)");
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(nombre);
+    if(db.open()){
+        QSqlQuery query;
+        query.prepare("DELETE FROM jugador");
+        query.exec();
+        qDebug() << "base de datos iniciada";
+
+    }
+    else{
+        qDebug() << "error al abrir base de datos";
+    }
+    mostrarTabla();
 }

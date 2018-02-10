@@ -35,6 +35,7 @@ public:
 
     void crearTablaUsuarios();
     void insertarUsuario();
+    void mostrarTabla();
     void mostrarDatos();
 
 private slots:
@@ -69,6 +70,10 @@ private slots:
     void on_pushButton_2_clicked();
 
     void on_verticalSlider_max_actionTriggered(int action);
+
+    void on_action_Open_triggered();
+
+    void on_actionNew_triggered();
 
 private:
     Ui::MainWindow *ui;
