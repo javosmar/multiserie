@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "duthread.h"
 #include "math.h"
+#include <dbmanager.h>
 
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 QString validez, latitud, longitud, velocidad, pulsacion;
@@ -13,54 +14,35 @@ int cont_rep;
 int vector[1500][1500], vector2[110][64];
 QCPColorScale *colorScale;
 double max = 0;
+QString nombre, nombrejugador;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
     connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
+    dialogoNew = new Dialog_nuevo;
+    dialogoHR = new Dialog_HRate;
+    dialogoNewCancha = new DialogNewCourt();
+    actualizarListaCanchas();
+    ui->actionNew->setEnabled(false);
     //----Serial----
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
+    connect(dialogoHR,SIGNAL(senal()),this,SLOT(Serial_Desconect()));
+    connect(dialogoHR,SIGNAL(finished(int)),this,SLOT(Serial_Desconect()));
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
             ui->serie_combo->insertItem(0,info.portName());
     }
     ui->serie_desconectar->setEnabled(false);
+    ui->serie_combo->setEnabled(false);
     //-----Plot----
     ui->plot->addGraph();
     colorScale = new QCPColorScale(ui->plot);
     ui->plot->plotLayout()->addElement(0, 1, colorScale);
-    //------SQL------
-//    QString nombre;
-//    nombre.append("base_datos.sqlite");
-//    db = QSqlDatabase::addDatabase("QSQLITE");
-//    db.setDatabaseName(nombre);
-//    if(db.open()){
-//        qDebug() << "base de datos iniciada";
-//    }
-//    else{
-//        qDebug() << "error al abrir base de datos";
-//    }
-//    crearTablaUsuarios();
-//    mostrarDatos();
-    //--------------
-    //club Paraná
-//    ui->lineEditcorner1->setText("-31,747308, -60,514664");
-//    ui->lineEditcorner2->setText("-31,747931, -60,514819");
-//    ui->lineEditcorner3->setText("-31,747757, -60,515908");
-//    ui->lineEditcorner4->setText("-31,747135, -60,515763");
-    //casa
-    ui->lineEditcorner1->setText("-31,748118, -60,515155");
-    ui->lineEditcorner2->setText("-31,748958, -60,515475");
-    ui->lineEditcorner3->setText("-31,748782, -60,516285");
-    ui->lineEditcorner4->setText("-31,747961, -60,516121");
-    //club Patronato
-//    ui->lineEditcorner1->setText("-31,742903, -60,506960");
-//    ui->lineEditcorner2->setText("-31,743539, -60,507244");
-//    ui->lineEditcorner3->setText("-31,743193, -60,508320");
-//    ui->lineEditcorner4->setText("-31,742563, -60,508043");
 }
 
 MainWindow::~MainWindow()
@@ -68,83 +50,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::crearTablaUsuarios()
-{
-    QString consulta;
-    consulta.append("CREATE TABLE IF NOT EXISTS jugador("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    "validez VARCHAR(15),"
-                    "latitud INTEGER NOT NULL,"
-                    "longitud INTEGER NOT NULL,"
-                    "velocidad INTEGER NOT NULL,"
-                    "pulsacion VARCHAR(15)"
-                    ");");
-    QSqlQuery crear;
-    crear.prepare(consulta);
-    if(crear.exec()){
-        qDebug() << "tabla creada correctamente";
-        crear.clear();
-    }
-    else{
-        qDebug() << "ERROR! " << crear.lastError();
-    }
-    crear.clear();
-}
-
-void MainWindow::insertarUsuario()
-{
-    QString consulta;
-    consulta.append("INSERT INTO jugador("
-                    "validez,"
-                    "latitud,"
-                    "longitud,"
-                    "velocidad,"
-                    "pulsacion) "
-                    "VALUES("
-                    "'"+validez+"',"
-                    ""+latitud+","
-                    ""+longitud+","
-                    ""+velocidad+","
-                    "'"+pulsacion+"'"
-                    ");");
-    QSqlQuery insertar;
-    insertar.prepare(consulta);
-    if(insertar.exec()){
-//        qDebug() << "usuario agregado correctamente";
-        insertar.clear();
-    }
-    else{
-//        qDebug() << "ERROR! " << insertar.lastError();
-    }
-    mostrarTabla();
-    insertar.clear();
-}
-
 void MainWindow::mostrarTabla()
 {
-    QString consulta;
-    consulta.append("SELECT * FROM jugador");
-    QSqlQuery mostrar;
-    mostrar.prepare(consulta);
-    if(mostrar.exec()){
-        //qDebug() << "consulta realizada con exito";
-    }
-    else{
-        qDebug() << "ERROR! " << mostrar.lastError();
-    }
-    int fila = 0;
-    ui->tableWidgetdato->setRowCount(0);
-    while(mostrar.next()){
-        ui->tableWidgetdato->insertRow(fila);
-        ui->tableWidgetdato->setItem(fila,0,new QTableWidgetItem(mostrar.value(1).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,1,new QTableWidgetItem(mostrar.value(2).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        fila++;
-    }
-    consulta.clear();
-    mostrar.clear();
+//    QString consulta;
+//    consulta.append("SELECT * FROM jugador");
+//    QSqlQuery mostrar;
+//    mostrar.prepare(consulta);
+//    if(mostrar.exec()){
+//        //qDebug() << "consulta realizada con exito";
+//    }
+//    else{
+//        qDebug() << "ERROR! " << mostrar.lastError();
+//    }
+//    int fila = 0;
+//    ui->tableWidgetdato->setRowCount(0);
+//    while(mostrar.next()){
+//        ui->tableWidgetdato->insertRow(fila);
+//        ui->tableWidgetdato->setItem(fila,0,new QTableWidgetItem(mostrar.value(1).toByteArray().constData()));
+//        ui->tableWidgetdato->setItem(fila,1,new QTableWidgetItem(mostrar.value(2).toByteArray().constData()));
+//        ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
+//        ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
+//        ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
+//        fila++;
+//    }
+//    consulta.clear();
+//    mostrar.clear();
 }
 
 void MainWindow::mostrarDatos()
@@ -157,7 +87,8 @@ void MainWindow::mostrarDatos()
             vector2[indice][jndice] = 0;
     cont_rep = 0;
     QString consulta;
-    consulta.append("SELECT * FROM jugador");
+    consulta.append("SELECT * FROM ");
+    consulta.append(nombre);
     QSqlQuery mostrar;
     mostrar.prepare(consulta);
     if(mostrar.exec()){
@@ -176,41 +107,109 @@ void MainWindow::mostrarDatos()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        if(mostrar.value(1) == "b")
-            cont_rep++;
-        int x = mostrar.value(3).toInt(&ok);
-        int y = mostrar.value(2).toInt(&ok);
-        int m = Mapeo_x(x,y);
-        int n = Mapeo_y(x,y);
-        addPoint(m, n);
-        int j = m / 10;
-        int k = n / 10;
-        vector[m][n] = vector[m][n] + 1;
-        vector2[j][k] = vector2[j][k] + 1;
-//        if((vector2[j][k] > max))
+//        if(mostrar.value(1) == "b")
+//            cont_rep++;
+//        int x = mostrar.value(3).toInt(&ok);
+//        int y = mostrar.value(2).toInt(&ok);
+//        int m = Mapeo_x(x,y);
+//        int n = Mapeo_y(x,y);
+//        addPoint(m, n);
+//        int j = m / 10;
+//        int k = n / 10;
+//        vector[m][n] = vector[m][n] + 1;
+//        vector2[j][k] = vector2[j][k] + 1;
+////        if((vector2[j][k] > max))
+////            max = vector2[j][k];
+//        if((vector2[j][k] > max) && (ui->verticalSlider_max->value() == 1)){
 //            max = vector2[j][k];
-        if((vector2[j][k] > max) && (ui->verticalSlider_max->value() == 1)){
-            max = vector2[j][k];
-            colorScale->axis()->setRange(QCPRange(0,max));
-        }
-        else{
-            max = ui->verticalSlider_max->value();
-            colorScale->axis()->setRange(QCPRange(0,ui->verticalSlider_max->value()));
-        }
-        if(vector2[j][k] > max)
-            vector2[j][k] = max;
-        ui->label_max->setText(QString::number(max));
-        ui->verticalSlider_max->setSliderPosition(max);
-//        qDebug() << j << k << vector2[j][k];
+//            colorScale->axis()->setRange(QCPRange(0,max));
+//        }
+//        else{
+//            max = ui->verticalSlider_max->value();
+//            colorScale->axis()->setRange(QCPRange(0,ui->verticalSlider_max->value()));
+//        }
+//        if(vector2[j][k] > max)
+//            vector2[j][k] = max;
+//        ui->label_max->setText(QString::number(max));
+//        ui->verticalSlider_max->setSliderPosition(max);
+////        qDebug() << j << k << vector2[j][k];
         fila++;
     }
-    plot();
-    mostrar.clear();
+//    plot();
+    //    mostrar.clear();
 }
 
-void MainWindow::Serial_Conf()
+void MainWindow::openFile()
 {
-    serial->setPortName(ui->serie_combo->currentText());
+    if (!file->open(QIODevice::ReadWrite | QIODevice::Text))
+        return;
+}
+
+void MainWindow::writeFile(QString texto)
+{
+    file = new QFile("canchas.txt");
+    openFile();
+    QTextStream flujo(file);
+    flujo.seek(file->size());
+    flujo << texto << "\n";
+    file->close();
+    dialogoNewCancha->limpiarCancha();
+}
+
+void MainWindow::readFile(QString palabra)
+{
+    file = new QFile("canchas.txt");
+    openFile();
+    QTextStream flujo(file);
+    QString buscado;
+    int posicion = 0;
+    bool encontrado = false;
+    while(!encontrado){
+        buscado = flujo.readLine();
+        if (buscado.contains(palabra, Qt::CaseInsensitive)){
+            esquinas.corner4 = buscado.right(22);
+            buscado.chop(23);
+            esquinas.corner3 = buscado.right(22);
+            buscado.chop(23);
+            esquinas.corner2 = buscado.right(22);
+            buscado.chop(23);
+            esquinas.corner1 = buscado.right(22);
+            buscado.chop(23);
+            esquinas.nombreCancha = buscado;
+            encontrado = true;
+        }
+        else
+            posicion++;
+    }
+    file->close();
+}
+
+void MainWindow::actualizarListaCanchas()
+{
+    file = new QFile("canchas.txt");
+    openFile();
+    QTextStream in(file);
+    QString linea;
+    int index;
+    int counter = 0;
+    ui->comboBoxCanchas->clear();
+    while(!in.atEnd()){
+        linea.clear();
+        linea = in.readLine();
+        index = linea.indexOf("*");
+        linea = linea.left(index);
+        listaCanchas.insert(0,linea);
+        counter++;
+    }
+    foreach (const QString &str, listaCanchas)
+        ui->comboBoxCanchas->insertItem(0,str);
+    listaCanchas.clear();
+    file->close();
+}
+
+void MainWindow::Serial_Conf(QString puertoNombre)
+{
+    serial->setPortName(puertoNombre);
     serial->setBaudRate(QSerialPort::Baud9600);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
@@ -228,6 +227,7 @@ void MainWindow::Serial_Conect()
         ui->serie_desconectar->setEnabled(true);
         serial->write("A");
         mThread->start(QThread::LowestPriority);
+        dialogoHR->show();
     }
     else{
         Serial_Error();
@@ -244,6 +244,7 @@ void MainWindow::Serial_Desconect()
     ui->serie_actualizar->setEnabled(true);
     ui->serie_desconectar->setEnabled(false);
     mThread->terminate();
+    mostrarDatos();
 }
 
 void MainWindow::Serial_Error()
@@ -256,33 +257,36 @@ void MainWindow::Serial_Error()
 
 void MainWindow::Serial_Pedir()
 {
-    if(serial->bytesAvailable() >= 28){
-        validez = serial->read(1);
-        latitud = serial->read(2);
+    DbManager::DataBlock data;
+    if(serial->bytesAvailable() >= 25){
+        data.validez = serial->read(1);
+        QString lat = serial->read(2);
         int lat_minutos = serial->read(7).toInt(&ok) / 6;
-        latitud.append(QString::number(lat_minutos));
-        int basura = serial->read(1).toInt(&ok);
-        longitud = serial->read(2);
+        lat.append(QString::number(lat_minutos));
+        data.latitud = lat.toInt(&ok);
+        serial->read(1);
+        QString lon = serial->read(2);
         int lon_minutos = serial->read(7).toInt(&ok) / 6;
-        longitud.append(QString::number(lon_minutos));
-        velocidad = serial->read(4);
-        pulsacion = serial->read(1);
-        insertarUsuario();
-//        qDebug() << validez << latitud << longitud << velocidad << pulsacion;
+        lon.append(QString::number(lon_minutos));
+        data.longitud = lon.toInt(&ok);
+        data.velocidad = serial->read(4).toInt(&ok);
+        data.pulsacion = serial->read(1);
+        db->addData(nombre,data);
+        qDebug() << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion;
+        dialogoHR->setHrPlayer(data.validez, data.velocidad);
     }
 }
 
 void MainWindow::on_serie_actualizar_clicked()
 {
     ui->serie_combo->clear();
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
             ui->serie_combo->insertItem(0,info.portName());
-    }
 }
 
 void MainWindow::on_serie_combo_activated(const QString &arg1)
 {
-    Serial_Conf();
+    Serial_Conf(arg1);
     Serial_Conect();
 }
 
@@ -376,24 +380,17 @@ void MainWindow::plot()
     colorMap->setColorScale(colorScale); // associate the color map with the color scale
     //    colorScale->axis()->setRange(QCPRange(0,max));
     //colorScale->axis()->setLabel("Magnetic Field Strength");
-
     // set the color gradient of the color map to one of the presets:
     colorMap->setGradient(QCPColorGradient::gpGrayscale); // we could have also created a QCPColorGradient instance and added own colors to the gradient, see the documentation of QCPColorGradient for what's possible.
-
     //    colorMap->setInterpolate(false);
     // rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
     colorMap->rescaleDataRange();
-
     // make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
     QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->plot);
     ui->plot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-
     // rescale the key (x) and value (y) axes so the whole color map is visible:
     ui->plot->rescaleAxes();
-
-
-
     //ui->plot->graph(0)->setData(qv_x, qv_y);
     ui->plot->replot();
     ui->plot->update();
@@ -401,7 +398,7 @@ void MainWindow::plot()
 
 void MainWindow::on_pushButtonmostrar_clicked()
 {
-    coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
+//    coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
     mostrarDatos();
     //plot();
 }
@@ -427,7 +424,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     int x4 = esq4.right(8).toInt(&ok);
     esq4.chop(10);
     int y4 = esq4.right(8).toInt(&ok);
-
     //mapeo de las esquinas
     //cálculo del ángulo entre rectas
     float coseno = (y2 - Y1) / (sqrt(pow((y2 - Y1),2) + pow((X1 - x2),2)));
@@ -436,7 +432,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
         alfa_rad = -fi_rad;
     else
         alfa_rad = fi_rad;
-
     //coordenadas en el nuevo sistema
     //esquinas
     m1 = 0;
@@ -447,10 +442,7 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     n3 = Mapeo_y(x3,y3);
     m4 = Mapeo_x(x4,y4);
     n4 = Mapeo_y(x4,y4);
-
     //disposición de los límites de los ejes
-//    ui->plot->xAxis->setRange(m1,m4);
-//    ui->plot->yAxis->setRange(n1,n2);
     clearData();
     addPoint(m1,n1);
     addPoint(m2,n2);
@@ -472,7 +464,7 @@ double MainWindow::Mapeo_y(double x, double y)
     return yprima;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pushButtonmanual_clicked()
 {
     QString punto_nuevo = ui->lineEditpunto->text();
     punto_nuevo.remove(QChar(','),Qt::CaseInsensitive);
@@ -482,28 +474,20 @@ void MainWindow::on_pushButton_clicked()
     m5 = Mapeo_x(x5,y5);
     n5 = Mapeo_y(x5,y5);
     addPoint(m5,n5);
-    validez = "C";
-    latitud = QString::number(y5);
-    longitud = QString::number(x5);
-    velocidad = "0.321";
-    pulsacion = "@";
-    insertarUsuario();
+    DbManager::DataBlock currentData;
+    currentData.validez = "C";
+    currentData.latitud = y5;
+    currentData.longitud = x5;
+    currentData.velocidad = 125;
+    currentData.pulsacion = "@";
+    db->addData(nombre,currentData);
 //    mostrarDatos();
 //    plot();
-//    qDebug() << x5 << y5 << m5 << n5;
 }
 
-void MainWindow::contador()
+void MainWindow::on_pushButtonrandom_clicked()
 {
-
-}
-
-void MainWindow::on_pushButton_2_clicked()
-{
-//    -31,747308, -60,514664
-//    -31,747931, -60,514819
-//    -31,747757, -60,515908
-//    -31,747135, -60,515763
+//-31,747308, -60,514664//-31,747931, -60,514819//-31,747757, -60,515908//-31,747135, -60,515763
     int aleatorioy = (qrand() % 622) + 747308;
     int aleatoriox = (qrand() % 1098) + 514665;
     QString punto;
@@ -521,47 +505,100 @@ void MainWindow::on_verticalSlider_max_actionTriggered(int action)
 
 void MainWindow::on_action_Open_triggered()
 {
-    QString nombre = QFileDialog::getOpenFileName(
+    path.clear();
+    path = QFileDialog::getSaveFileName(
                 this,
-                "GPSport - Open File",
-                "/Users/javos/Desktop/casa",
-                "Databases (*.sqlite);;All files (*.*)");
-    if(!nombre.isEmpty()){
-        qDebug() << "existe";
-        db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName(nombre);
-        if(db.open()){
-            qDebug() << "base de datos iniciada";
-        }
-        else{
-            qDebug() << "error al abrir base de datos";
-        }
-        crearTablaUsuarios();
-        mostrarTabla();
-    }
-    else{
-        qDebug() << "no existe";
+                "GPSport - Abrir o crear base de datos",
+                "/Users/javos/Desktop/casa/",
+                "Databases (*.sqlite);;All Files (*.*)");
+    if(!path.isNull())
+        ejecutarNuevo();
+}
+
+void MainWindow::ejecutarNuevo()
+{
+    db = new DbManager(path);
+    if(db->isOpen()){
+        QString titulo;
+        titulo.append("GPSport - ");
+        titulo.append(path);
+        this->setWindowTitle(titulo);
+        ui->comboBoxtablas->setEnabled(true);
+        ui->actionNew->setEnabled(true);
+        actualizarLista();
     }
 }
 
 void MainWindow::on_actionNew_triggered()
 {
-    QString nombre = QFileDialog::getSaveFileName(
-                this,
-                "GPSport - Nueva base de datos",
-                "/Users/javos/Desktop/casa",
-                "Databases (*.sqlite);;All Files (*.*)");
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(nombre);
-    if(db.open()){
-        QSqlQuery query;
-        query.prepare("DELETE FROM jugador");
-        query.exec();
-        qDebug() << "base de datos iniciada";
+    connect(dialogoNew,SIGNAL(senal()),this,SLOT(ejecutarNuevoJugador()));
+    dialogoNew->setModal(true);
+    dialogoNew->setWindowTitle("Nuevo Jugador");
+    dialogoNew->show();
+}
 
+void MainWindow::ejecutarNuevoJugador()
+{
+    disconnect(dialogoNew,0,this,0);
+    nombre = dialogoNew->obtenerNombre();
+    if(db->createTable(nombre)){
+        ui->serie_combo->setEnabled(true);
+        actualizarLista();
+        QString titulo;
+        titulo.append("GPSport - ");
+        titulo.append(path);
+        titulo.append(" - ");
+        titulo.append(nombre);
+        this->setWindowTitle(titulo);
     }
-    else{
-        qDebug() << "error al abrir base de datos";
-    }
-    mostrarTabla();
+}
+
+void MainWindow::actualizarLista()
+{
+    ui->comboBoxtablas->clear();
+    QStringList lista;
+    lista = db->obtenerLista();
+    foreach (const QString &str, lista)
+        ui->comboBoxtablas->insertItem(0,str);
+}
+
+void MainWindow::on_comboBoxtablas_activated(const QString &arg1)
+{
+    nombre = arg1;
+    ui->serie_combo->setEnabled(true);
+    QString titulo;
+    titulo.append("GPSport - ");
+    titulo.append(path);
+    titulo.append(" - ");
+    titulo.append(nombre);
+    this->setWindowTitle(titulo);
+}
+
+void MainWindow::on_actionAdd_Court_triggered()
+{
+    connect(dialogoNewCancha,SIGNAL(senal()),this,SLOT(agregarCancha()));
+    dialogoNewCancha->setModal(true);
+    dialogoNewCancha->show();
+}
+
+void MainWindow::agregarCancha()
+{
+    disconnect(dialogoNewCancha,0,this,0);
+    QString cancha = dialogoNewCancha->obtenerCancha();
+    writeFile(cancha);
+    actualizarListaCanchas();
+}
+
+void MainWindow::on_comboBoxCanchas_activated(const QString &arg1)
+{
+    readFile(arg1);
+    ui->lineEditcorner1->setText(esquinas.corner1);
+    ui->lineEditcorner2->setText(esquinas.corner2);
+    ui->lineEditcorner3->setText(esquinas.corner3);
+    ui->lineEditcorner4->setText(esquinas.corner4);
+}
+
+void MainWindow::on_actionShow_Position_triggered()
+{
+
 }

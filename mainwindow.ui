@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1245</width>
-    <height>909</height>
+    <height>835</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QTableWidget" name="tableWidgetdato">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>230</x>
       <y>10</y>
-      <width>571</width>
-      <height>192</height>
+      <width>521</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="autoScroll">
@@ -82,59 +82,13 @@
      </property>
     </column>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>162</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetFixedSize</enum>
-     </property>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QComboBox" name="serie_combo"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="serie_actualizar">
-         <property name="text">
-          <string>Actualizar</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QPushButton" name="serie_desconectar">
-       <property name="text">
-        <string>Desconectar</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QProgressBar" name="progressBarserie">
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="textVisible">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QCustomPlot" name="plot" native="true">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>220</y>
+      <y>300</y>
       <width>891</width>
-      <height>551</height>
+      <height>471</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -247,7 +201,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButtonmanual">
     <property name="geometry">
      <rect>
       <x>1090</x>
@@ -270,7 +224,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="pushButtonrandom">
     <property name="geometry">
      <rect>
       <x>1070</x>
@@ -318,13 +272,100 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>188</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Jugadores</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QComboBox" name="comboBoxtablas">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string>Cancha</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QComboBox" name="comboBoxCanchas"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Conexión</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetFixedSize</enum>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QComboBox" name="serie_combo"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="serie_actualizar">
+              <property name="text">
+               <string>Actualizar</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="serie_desconectar">
+            <property name="text">
+             <string>Desconectar</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QProgressBar" name="progressBarserie">
+            <property name="value">
+             <number>0</number>
+            </property>
+            <property name="textVisible">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>plot</zorder>
-   <zorder>pushButton</zorder>
+   <zorder>pushButtonmanual</zorder>
    <zorder>lineEditpunto</zorder>
-   <zorder>pushButton_2</zorder>
+   <zorder>pushButtonrandom</zorder>
    <zorder>verticalSlider_max</zorder>
    <zorder>label_max</zorder>
   </widget>
@@ -341,10 +382,26 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionNew"/>
     <addaction name="action_Open"/>
+    <addaction name="actionNew"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionAdd_Court"/>
+   </widget>
+   <widget class="QMenu" name="menu_Position">
+    <property name="title">
+     <string>&amp;GPS</string>
+    </property>
+    <addaction name="actionShow_Position"/>
    </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menu_Position"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -357,12 +414,27 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Open">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Open/New Database</string>
    </property>
   </action>
   <action name="actionNew">
    <property name="text">
-    <string>&amp;New</string>
+    <string>&amp;New Player</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>&amp;Close</string>
+   </property>
+  </action>
+  <action name="actionAdd_Court">
+   <property name="text">
+    <string>&amp;Add Court</string>
+   </property>
+  </action>
+  <action name="actionShow_Position">
+   <property name="text">
+    <string>Show &amp;Position</string>
    </property>
   </action>
  </widget>
