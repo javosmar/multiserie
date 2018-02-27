@@ -11,6 +11,7 @@ void DuThread::run()
     while(true){
         if(contador == 100){
             contador = 0;
+            emit actualizar();
         }
         emit valorCambiado(contador);
         msleep(mTiempo);

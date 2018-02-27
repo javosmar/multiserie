@@ -11,6 +11,7 @@ public:
 
 signals:
     void valorCambiado(int);
+    void actualizar();
 
 protected:
     void run() override;

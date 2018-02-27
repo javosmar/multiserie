@@ -24,21 +24,19 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
     connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
+//    connect(mThread,&DuThread::actualizar,this,SLOT(on_pushButtonmostrar_clicked()));
     dialogoNew = new Dialog_nuevo;
     dialogoHR = new Dialog_HRate;
     dialogoNewCancha = new DialogNewCourt();
-    actualizarListaCanchas();
-    ui->actionNew->setEnabled(false);
+    dialogoSelectCourt = new Dialog_SelectCourt;
+    dialogoConexion = new Dialog_Conexion;
+//    ui->actionNew->setEnabled(false);
     //----Serial----
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
     connect(dialogoHR,SIGNAL(senal()),this,SLOT(Serial_Desconect()));
     connect(dialogoHR,SIGNAL(finished(int)),this,SLOT(Serial_Desconect()));
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
-            ui->serie_combo->insertItem(0,info.portName());
-    }
-    ui->serie_desconectar->setEnabled(false);
-    ui->serie_combo->setEnabled(false);
+    ui->actionSerialConect->setEnabled(false);
     //-----Plot----
     ui->plot->addGraph();
     colorScale = new QCPColorScale(ui->plot);
@@ -184,29 +182,6 @@ void MainWindow::readFile(QString palabra)
     file->close();
 }
 
-void MainWindow::actualizarListaCanchas()
-{
-    file = new QFile("canchas.txt");
-    openFile();
-    QTextStream in(file);
-    QString linea;
-    int index;
-    int counter = 0;
-    ui->comboBoxCanchas->clear();
-    while(!in.atEnd()){
-        linea.clear();
-        linea = in.readLine();
-        index = linea.indexOf("*");
-        linea = linea.left(index);
-        listaCanchas.insert(0,linea);
-        counter++;
-    }
-    foreach (const QString &str, listaCanchas)
-        ui->comboBoxCanchas->insertItem(0,str);
-    listaCanchas.clear();
-    file->close();
-}
-
 void MainWindow::Serial_Conf(QString puertoNombre)
 {
     serial->setPortName(puertoNombre);
@@ -215,6 +190,7 @@ void MainWindow::Serial_Conf(QString puertoNombre)
     serial->setParity(QSerialPort::NoParity);
     serial->setStopBits(QSerialPort::OneStop);
     serial->setFlowControl(QSerialPort::NoFlowControl);
+    ui->actionSerialConect->setEnabled(true); //añadir la existencia de tabla y database
 }
 
 void MainWindow::Serial_Conect()
@@ -222,12 +198,10 @@ void MainWindow::Serial_Conect()
     if((serial->open(QIODevice::ReadWrite)))
     {
         estado_serial = true;
-        ui->serie_combo->setEnabled(false);
-        ui->serie_actualizar->setEnabled(false);
-        ui->serie_desconectar->setEnabled(true);
         serial->write("A");
         mThread->start(QThread::LowestPriority);
         dialogoHR->show();
+        ui->actionSerialConect->setIcon(QPixmap("://Icons/TerminarTransmision.png"));
     }
     else{
         Serial_Error();
@@ -240,17 +214,16 @@ void MainWindow::Serial_Desconect()
     serial->waitForBytesWritten(30);
     serial->close();
     estado_serial = false;
-    ui->serie_combo->setEnabled(true);
-    ui->serie_actualizar->setEnabled(true);
-    ui->serie_desconectar->setEnabled(false);
     mThread->terminate();
     mostrarDatos();
+    ui->actionSerialConect->setIcon(QPixmap("://Icons/IniciarTransmision.png"));
 }
 
 void MainWindow::Serial_Error()
 {
     QMessageBox error;
-    error.setText("Verifique la conexión de la placa.");
+    error.setWindowTitle("GPSport - Error");
+    error.setText("Verifique la conexión con la unidad central.");
     error.setIcon(QMessageBox::Warning);
     error.exec();
 }
@@ -275,25 +248,6 @@ void MainWindow::Serial_Pedir()
         qDebug() << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion;
         dialogoHR->setHrPlayer(data.validez, data.velocidad);
     }
-}
-
-void MainWindow::on_serie_actualizar_clicked()
-{
-    ui->serie_combo->clear();
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-            ui->serie_combo->insertItem(0,info.portName());
-}
-
-void MainWindow::on_serie_combo_activated(const QString &arg1)
-{
-    Serial_Conf(arg1);
-    Serial_Conect();
-}
-
-void MainWindow::on_serie_desconectar_clicked()
-{
-    Serial_Desconect();
-//    mostrarDatos();
 }
 
 void MainWindow::addPoint(double x, double y)
@@ -398,7 +352,7 @@ void MainWindow::plot()
 
 void MainWindow::on_pushButtonmostrar_clicked()
 {
-//    coordenadas(ui->lineEditcorner1->text(), ui->lineEditcorner2->text(), ui->lineEditcorner3->text(), ui->lineEditcorner4->text());
+//    coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4));
     mostrarDatos();
     //plot();
 }
@@ -500,6 +454,7 @@ void MainWindow::on_pushButtonrandom_clicked()
 
 void MainWindow::on_verticalSlider_max_actionTriggered(int action)
 {
+    qDebug() << action;
     ui->label_max->setText(QString::number(ui->verticalSlider_max->value()));
 }
 
@@ -508,8 +463,8 @@ void MainWindow::on_action_Open_triggered()
     path.clear();
     path = QFileDialog::getSaveFileName(
                 this,
-                "GPSport - Abrir o crear base de datos",
-                "/Users/javos/Desktop/casa/",
+                "GPSport - Abrir o crear equipo",
+                "/Users/javos/Desktop/",
                 "Databases (*.sqlite);;All Files (*.*)");
     if(!path.isNull())
         ejecutarNuevo();
@@ -533,6 +488,7 @@ void MainWindow::on_actionNew_triggered()
 {
     connect(dialogoNew,SIGNAL(senal()),this,SLOT(ejecutarNuevoJugador()));
     dialogoNew->setModal(true);
+    dialogoNew->adjustSize();
     dialogoNew->setWindowTitle("Nuevo Jugador");
     dialogoNew->show();
 }
@@ -540,16 +496,25 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::ejecutarNuevoJugador()
 {
     disconnect(dialogoNew,0,this,0);
-    nombre = dialogoNew->obtenerNombre();
-    if(db->createTable(nombre)){
-        ui->serie_combo->setEnabled(true);
+    Dialog_nuevo::perfil p = dialogoNew->obtenerPerfil();
+    QString cadena;
+    cadena = p.nombre;
+    if(cadena.contains(" ")){
+        int u = cadena.indexOf(" ");
+        cadena.replace(u,1,"_");
+    }
+    if(db->createTable(cadena)){
+        ui->actionSerialConect->setEnabled(true);
         actualizarLista();
-        QString titulo;
-        titulo.append("GPSport - ");
-        titulo.append(path);
-        titulo.append(" - ");
-        titulo.append(nombre);
-        this->setWindowTitle(titulo);
+    }
+    if(db->createTablePerfiles()){
+        DbManager::PerfilBlock currentPerfil;
+        currentPerfil.nombre = cadena;
+        currentPerfil.photo = p.photo;
+        currentPerfil.fecha = p.fecha;
+        currentPerfil.peso = p.peso;
+        currentPerfil.altura = p.altura;
+        db->addPerfil(currentPerfil);
     }
 }
 
@@ -558,20 +523,39 @@ void MainWindow::actualizarLista()
     ui->comboBoxtablas->clear();
     QStringList lista;
     lista = db->obtenerLista();
-    foreach (const QString &str, lista)
-        ui->comboBoxtablas->insertItem(0,str);
+    ui->comboBoxtablas->insertItem(1,"");
+    foreach (const QString &str, lista){
+        if((str != "perfiles")&&(str != "sqlite_sequence")){
+            QString nombre = str;
+            if(nombre.contains("_")){
+                int u = nombre.indexOf("_");
+                nombre.replace(u,1," ");
+            }
+            ui->comboBoxtablas->insertItem(1,nombre);
+        }
+    }
 }
 
 void MainWindow::on_comboBoxtablas_activated(const QString &arg1)
 {
-    nombre = arg1;
-    ui->serie_combo->setEnabled(true);
-    QString titulo;
-    titulo.append("GPSport - ");
-    titulo.append(path);
-    titulo.append(" - ");
-    titulo.append(nombre);
-    this->setWindowTitle(titulo);
+    if(arg1 == ""){
+        ui->labelBusqueda->setPixmap(QPixmap(":/noPhoto.png"));
+    }
+    else{
+        nombre = arg1;
+        if(nombre.contains(" ")){
+            int u = nombre.indexOf(" ");
+            nombre.replace(u,1,"_");
+        }
+        if(db->buscarPerfil(nombre)){
+            DbManager::PerfilBlock q = db->obtenerPerfil();
+            QPixmap foto;
+            foto.loadFromData(q.photo);
+            ui->labelBusqueda->setPixmap(foto);
+        }
+    }
+
+
 }
 
 void MainWindow::on_actionAdd_Court_triggered()
@@ -586,19 +570,70 @@ void MainWindow::agregarCancha()
     disconnect(dialogoNewCancha,0,this,0);
     QString cancha = dialogoNewCancha->obtenerCancha();
     writeFile(cancha);
-    actualizarListaCanchas();
-}
-
-void MainWindow::on_comboBoxCanchas_activated(const QString &arg1)
-{
-    readFile(arg1);
-    ui->lineEditcorner1->setText(esquinas.corner1);
-    ui->lineEditcorner2->setText(esquinas.corner2);
-    ui->lineEditcorner3->setText(esquinas.corner3);
-    ui->lineEditcorner4->setText(esquinas.corner4);
 }
 
 void MainWindow::on_actionShow_Position_triggered()
 {
 
+}
+
+void MainWindow::on_action_Seleccionar_Cancha_triggered()
+{
+    connect(dialogoSelectCourt,SIGNAL(senal()),this,SLOT(seleccionCancha()));
+    dialogoSelectCourt->setModal(true);
+    dialogoSelectCourt->show();
+}
+
+void MainWindow::seleccionCancha()
+{
+    disconnect(dialogoSelectCourt,0,this,0);
+    QString court;
+    court = dialogoSelectCourt->obtenerCancha();
+    readFile(court);
+    ui->labelCanchaSelected->setText(esquinas.nombreCancha);
+}
+
+void MainWindow::on_action_Configurar_Conexi_n_triggered()
+{
+    connect(dialogoConexion,SIGNAL(senal()),this,SLOT(setCom()));
+    dialogoConexion->setModal(true);
+    dialogoConexion->show();
+}
+
+void MainWindow::setCom()
+{
+    disconnect(dialogoConexion,0,this,0);
+    QString com = dialogoConexion->obtenerPuerto();
+    Serial_Conf(com);
+}
+
+void MainWindow::on_actionClose_triggered()
+{
+    close();
+}
+
+void MainWindow::on_actionSerialConect_triggered()
+{
+    if(estado_serial){
+        Serial_Desconect();
+//        mostrarDatos();
+    }
+    else{
+        Serial_Conect();
+    }
+}
+
+void MainWindow::on_actionserialConfig_triggered()
+{
+    on_action_Configurar_Conexi_n_triggered();
+}
+
+void MainWindow::on_actionEquipo_triggered()
+{
+    on_action_Open_triggered();
+}
+
+void MainWindow::on_actionJugador_triggered()
+{
+    on_actionNew_triggered();
 }

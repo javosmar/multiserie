@@ -10,5 +10,20 @@
         <file>soccer_field_thumb.png</file>
         <file>qweqeqweqweqeqw.png</file>
         <file>Captura.PNG</file>
+        <file>noPhoto.png</file>
+        <file>Icons/SerialConect.png</file>
+        <file>Icons/Actualizar.png</file>
+        <file>Icons/DonwloadData.png</file>
+        <file>Icons/Power.png</file>
+        <file>Icons/SelectFoto.png</file>
+        <file>Icons/SerialConectWhite.png</file>
+        <file>Icons/SerialConfig.png</file>
+        <file>Icons/Tools.png</file>
+        <file>Icons/IniciarTransmision.png</file>
+        <file>Icons/TerminarTransmision.png</file>
+        <file>Icons/Carpeta.png</file>
+        <file>Icons/Database.png</file>
+        <file>Icons/Perfil.png</file>
+        <file>Icons/Chrome.png</file>
     </qresource>
 </RCC>

@@ -17,6 +17,8 @@
 #include <dialog_nuevo.h>
 #include <dialog_hrate.h>
 #include <dialognewcourt.h>
+#include <dialog_selectcourt.h>
+#include <dialog_conexion.h>
 
 namespace Ui {
 class MainWindow;
@@ -51,15 +53,11 @@ private slots:
     void openFile();
     void writeFile(QString texto);
     void readFile(QString palabra);
-    void actualizarListaCanchas();
     void Serial_Conf(QString puertoNombre);
     void Serial_Conect();
     void Serial_Desconect();
     void Serial_Error();
     void Serial_Pedir();
-    void on_serie_combo_activated(const QString &arg1);
-    void on_serie_actualizar_clicked();
-    void on_serie_desconectar_clicked();
     void on_pushButtonmostrar_clicked();
     void coordenadas(QString, QString, QString, QString);
     double Mapeo_x(double, double);
@@ -75,8 +73,21 @@ private slots:
     void on_comboBoxtablas_activated(const QString &arg1);
     void on_actionAdd_Court_triggered();
     void agregarCancha();
-    void on_comboBoxCanchas_activated(const QString &arg1);
     void on_actionShow_Position_triggered();
+    void on_action_Seleccionar_Cancha_triggered();
+    void seleccionCancha();
+    void on_action_Configurar_Conexi_n_triggered();
+    void setCom();
+
+    void on_actionClose_triggered();
+
+    void on_actionSerialConect_triggered();
+
+    void on_actionserialConfig_triggered();
+
+    void on_actionEquipo_triggered();
+
+    void on_actionJugador_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -86,6 +97,8 @@ private:
     Dialog_nuevo *dialogoNew;
     Dialog_HRate *dialogoHR;
     DialogNewCourt *dialogoNewCancha;
+    Dialog_SelectCourt *dialogoSelectCourt;
+    Dialog_Conexion *dialogoConexion;
     DbManager *db;
     QString path, nombre;
     QFile *file;
