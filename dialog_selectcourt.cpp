@@ -29,7 +29,7 @@ void Dialog_SelectCourt::actualizarCanchas()
         linea = in.readLine();
         index = linea.indexOf("*");
         linea = linea.left(index);
-        listaCanchas.insert(0,linea);
+        listaCanchas.insert(1,linea);
         counter++;
     }
     foreach (const QString &str, listaCanchas)

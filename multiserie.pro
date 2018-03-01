@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     dialog_hrate.cpp \
     dialognewcourt.cpp \
     dialog_selectcourt.cpp \
-    dialog_conexion.cpp
+    dialog_conexion.cpp \
+    dialog_gps.cpp
 
 HEADERS  += mainwindow.h \
     duthread.h \
@@ -31,14 +32,16 @@ HEADERS  += mainwindow.h \
     dialog_hrate.h \
     dialognewcourt.h \
     dialog_selectcourt.h \
-    dialog_conexion.h
+    dialog_conexion.h \
+    dialog_gps.h
 
 FORMS    += mainwindow.ui \
     dialog_nuevo.ui \
     dialog_hrate.ui \
     dialognewcourt.ui \
     dialog_selectcourt.ui \
-    dialog_conexion.ui
+    dialog_conexion.ui \
+    dialog_gps.ui
 
 QMAKE_CXXFLAGS += -std=gnu++14
 

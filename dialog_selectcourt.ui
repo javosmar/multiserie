@@ -25,6 +25,10 @@
   <property name="windowTitle">
    <string>Selección de cancha</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="recurso.qrc">
+    <normaloff>:/Icons/png/001-placeholder.png</normaloff>:/Icons/png/001-placeholder.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <spacer name="verticalSpacer">
@@ -89,7 +93,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="recurso.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

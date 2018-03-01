@@ -25,6 +25,10 @@
   <property name="windowTitle">
    <string>Conexión con unidad central</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="recurso.qrc">
+    <normaloff>:/Icons/png/007-technology.png</normaloff>:/Icons/png/007-technology.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <spacer name="verticalSpacer">
@@ -62,7 +66,7 @@
         </property>
         <property name="icon">
          <iconset resource="recurso.qrc">
-          <normaloff>:/Icons/Actualizar.png</normaloff>:/Icons/Actualizar.png</iconset>
+          <normaloff>:/Icons/png/014-arrows.png</normaloff>:/Icons/png/014-arrows.png</iconset>
         </property>
        </widget>
       </item>

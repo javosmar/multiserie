@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>761</width>
-    <height>395</height>
+    <width>604</width>
+    <height>369</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,12 +19,22 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="recurso.qrc">
+    <normaloff>:/Icons/png/008-favorite.png</normaloff>:/Icons/png/008-favorite.png</iconset>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTableWidget" name="tableWidgetdato">
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>30</y>
+      <y>80</y>
       <width>256</width>
       <height>192</height>
      </rect>
@@ -91,7 +101,7 @@
    <widget class="QLineEdit" name="lineEditpunto">
     <property name="geometry">
      <rect>
-      <x>556</x>
+      <x>485</x>
       <y>9</y>
       <width>110</width>
       <height>20</height>
@@ -101,8 +111,8 @@
    <widget class="QPushButton" name="pushButtonmanual">
     <property name="geometry">
      <rect>
-      <x>556</x>
-      <y>35</y>
+      <x>485</x>
+      <y>36</y>
       <width>80</width>
       <height>23</height>
      </rect>
@@ -114,8 +124,8 @@
    <widget class="QPushButton" name="pushButtonrandom">
     <property name="geometry">
      <rect>
-      <x>556</x>
-      <y>64</y>
+      <x>485</x>
+      <y>65</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -127,8 +137,8 @@
    <widget class="QSlider" name="verticalSlider_max">
     <property name="geometry">
      <rect>
-      <x>481</x>
-      <y>93</y>
+      <x>570</x>
+      <y>50</y>
       <width>16</width>
       <height>84</height>
      </rect>
@@ -149,8 +159,8 @@
    <widget class="QLabel" name="label_max">
     <property name="geometry">
      <rect>
-      <x>503</x>
-      <y>93</y>
+      <x>490</x>
+      <y>140</y>
       <width>47</width>
       <height>16</height>
      </rect>
@@ -159,31 +169,24 @@
      <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QCustomPlot" name="plot" native="true">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>218</y>
-      <width>466</width>
-      <height>118</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>10</y>
-      <width>183</width>
-      <height>151</height>
+      <x>9</x>
+      <y>9</y>
+      <width>196</width>
+      <height>121</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
       <widget class="QGroupBox" name="groupBox_2">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="title">
         <string>Lista de jugadores en el equipo</string>
        </property>
@@ -193,6 +196,12 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="minimumSize">
+           <size>
+            <width>146</width>
+            <height>20</height>
+           </size>
+          </property>
          </widget>
         </item>
        </layout>
@@ -200,6 +209,12 @@
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="title">
         <string>Conexión</string>
        </property>
@@ -211,6 +226,12 @@
           </property>
           <item>
            <widget class="QProgressBar" name="progressBarserie">
+            <property name="minimumSize">
+             <size>
+              <width>144</width>
+              <height>21</height>
+             </size>
+            </property>
             <property name="value">
              <number>0</number>
             </property>
@@ -229,8 +250,8 @@
    <widget class="QPushButton" name="pushButtonmostrar">
     <property name="geometry">
      <rect>
-      <x>474</x>
-      <y>42</y>
+      <x>490</x>
+      <y>100</y>
       <width>75</width>
       <height>33</height>
      </rect>
@@ -253,15 +274,27 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>10</y>
+      <x>212</x>
+      <y>9</y>
       <width>231</width>
-      <height>21</height>
+      <height>61</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QLabel" name="label">
+       <property name="minimumSize">
+        <size>
+         <width>104</width>
+         <height>19</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Cancha seleccionada:</string>
        </property>
@@ -269,9 +302,17 @@
      </item>
      <item>
       <widget class="QLabel" name="labelCanchaSelected">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
@@ -284,10 +325,10 @@
    <widget class="QLabel" name="labelBusqueda">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>110</y>
-      <width>151</width>
-      <height>171</height>
+      <x>20</x>
+      <y>140</y>
+      <width>128</width>
+      <height>128</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -296,18 +337,29 @@
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
     <property name="text">
      <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="recurso.qrc">:/noPhoto.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
     </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
    </widget>
+   <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>pushButtonmostrar</zorder>
-   <zorder>tableWidgetdato</zorder>
-   <zorder>plot</zorder>
    <zorder>pushButtonmanual</zorder>
    <zorder>lineEditpunto</zorder>
    <zorder>pushButtonrandom</zorder>
@@ -320,7 +372,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>761</width>
+     <width>604</width>
      <height>18</height>
     </rect>
    </property>
@@ -346,13 +398,19 @@
     <property name="title">
      <string>&amp;GPS</string>
     </property>
-    <addaction name="actionShow_Position"/>
+    <addaction name="actionMostrar_Analisis"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
    <addaction name="menu_Position"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
@@ -377,9 +435,12 @@
    <addaction name="actionEquipo"/>
    <addaction name="actionJugador"/>
    <addaction name="separator"/>
+   <addaction name="actionCancha"/>
+   <addaction name="separator"/>
    <addaction name="actionserialConfig"/>
    <addaction name="actionSerialConect"/>
    <addaction name="separator"/>
+   <addaction name="actionAnalisis"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Open">
@@ -402,9 +463,9 @@
     <string>&amp;Nueva Cancha</string>
    </property>
   </action>
-  <action name="actionShow_Position">
+  <action name="actionMostrar_Analisis">
    <property name="text">
-    <string>&amp;Mostrar Mapa</string>
+    <string>&amp;Análisis gráfico</string>
    </property>
   </action>
   <action name="action_Seleccionar_Cancha">
@@ -420,7 +481,7 @@
   <action name="actionSerialConect">
    <property name="icon">
     <iconset resource="recurso.qrc">
-     <normaloff>:/Icons/IniciarTransmision.png</normaloff>:/Icons/IniciarTransmision.png</iconset>
+     <normaloff>:/Icons/png/032-play-arrow.png</normaloff>:/Icons/png/032-play-arrow.png</iconset>
    </property>
    <property name="text">
     <string>Iniciar entrenamiento</string>
@@ -432,7 +493,7 @@
   <action name="actionserialConfig">
    <property name="icon">
     <iconset resource="recurso.qrc">
-     <normaloff>:/Icons/SerialConect.png</normaloff>:/Icons/SerialConect.png</iconset>
+     <normaloff>:/Icons/png/007-technology.png</normaloff>:/Icons/png/007-technology.png</iconset>
    </property>
    <property name="text">
     <string>Configurar unidad central</string>
@@ -444,19 +505,19 @@
   <action name="actionEquipo">
    <property name="icon">
     <iconset resource="recurso.qrc">
-     <normaloff>:/Icons/Database.png</normaloff>:/Icons/Database.png</iconset>
+     <normaloff>:/Icons/png/005-social-2.png</normaloff>:/Icons/png/005-social-2.png</iconset>
    </property>
    <property name="text">
     <string>Crear o abrir equipo</string>
    </property>
    <property name="iconText">
-    <string>Equipo</string>
+    <string>Club</string>
    </property>
   </action>
   <action name="actionJugador">
    <property name="icon">
     <iconset resource="recurso.qrc">
-     <normaloff>:/Icons/Perfil.png</normaloff>:/Icons/Perfil.png</iconset>
+     <normaloff>:/Icons/png/013-people.png</normaloff>:/Icons/png/013-people.png</iconset>
    </property>
    <property name="text">
     <string>Nuevo jugador</string>
@@ -465,16 +526,26 @@
     <string>Jugador</string>
    </property>
   </action>
+  <action name="actionAnalisis">
+   <property name="icon">
+    <iconset resource="recurso.qrc">
+     <normaloff>:/Icons/png/004-paper.png</normaloff>:/Icons/png/004-paper.png</iconset>
+   </property>
+   <property name="text">
+    <string>Análisis</string>
+   </property>
+  </action>
+  <action name="actionCancha">
+   <property name="icon">
+    <iconset resource="recurso.qrc">
+     <normaloff>:/Icons/png/001-placeholder.png</normaloff>:/Icons/png/001-placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cancha</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="recurso.qrc"/>
  </resources>

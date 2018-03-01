@@ -19,6 +19,7 @@
 #include <dialognewcourt.h>
 #include <dialog_selectcourt.h>
 #include <dialog_conexion.h>
+#include <dialog_gps.h>
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +42,12 @@ public:
         QString corner3;
         QString corner4;
     };
+    struct Config{
+        QString database;
+        QString jugador;
+        QString cancha;
+        QString puerto;
+    };
     //----Plot----
     void addPoint(double x, double y);
     void clearData();
@@ -50,6 +57,8 @@ public:
     void mostrarDatos();
 
 private slots:
+    void initConfiguration();
+    void lastConfiguration();
     void openFile();
     void writeFile(QString texto);
     void readFile(QString palabra);
@@ -59,6 +68,7 @@ private slots:
     void Serial_Error();
     void Serial_Pedir();
     void on_pushButtonmostrar_clicked();
+    void filtroMatricial();
     void coordenadas(QString, QString, QString, QString);
     double Mapeo_x(double, double);
     double Mapeo_y(double, double);
@@ -73,21 +83,19 @@ private slots:
     void on_comboBoxtablas_activated(const QString &arg1);
     void on_actionAdd_Court_triggered();
     void agregarCancha();
-    void on_actionShow_Position_triggered();
+    void on_actionMostrar_Analisis_triggered();
     void on_action_Seleccionar_Cancha_triggered();
     void seleccionCancha();
     void on_action_Configurar_Conexi_n_triggered();
     void setCom();
-
     void on_actionClose_triggered();
-
     void on_actionSerialConect_triggered();
-
     void on_actionserialConfig_triggered();
-
     void on_actionEquipo_triggered();
-
     void on_actionJugador_triggered();
+    void on_actionAnalisis_triggered();
+
+    void on_actionCancha_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -99,11 +107,14 @@ private:
     DialogNewCourt *dialogoNewCancha;
     Dialog_SelectCourt *dialogoSelectCourt;
     Dialog_Conexion *dialogoConexion;
+    Dialog_Gps *dialogoGps;
     DbManager *db;
     QString path, nombre;
     QFile *file;
     QStringList listaCanchas;
     corners esquinas;
+    int ancho,alto;
+    Config lastConfig;
 };
 
 #endif // MAINWINDOW_H

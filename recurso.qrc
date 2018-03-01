@@ -25,5 +25,50 @@
         <file>Icons/Database.png</file>
         <file>Icons/Perfil.png</file>
         <file>Icons/Chrome.png</file>
+        <file>TransparentSoccerField.png</file>
+        <file>Icons/Analisis.png</file>
+        <file>Icons/AnalisisGrafico.png</file>
+        <file>Icons/Club.png</file>
+        <file>Icons/png/001-placeholder.png</file>
+        <file>Icons/png/002-button.png</file>
+        <file>Icons/png/003-interface-1.png</file>
+        <file>Icons/png/004-paper.png</file>
+        <file>Icons/png/005-social-2.png</file>
+        <file>Icons/png/006-sign.png</file>
+        <file>Icons/png/007-technology.png</file>
+        <file>Icons/png/008-favorite.png</file>
+        <file>Icons/png/009-interface.png</file>
+        <file>Icons/png/010-player.png</file>
+        <file>Icons/png/011-load.png</file>
+        <file>Icons/png/012-arrows-1.png</file>
+        <file>Icons/png/013-people.png</file>
+        <file>Icons/png/014-arrows.png</file>
+        <file>Icons/png/015-bluetooth.png</file>
+        <file>Icons/png/016-social-1.png</file>
+        <file>Icons/png/017-social.png</file>
+        <file>Icons/png/018-bell.png</file>
+        <file>Icons/png/019-play.png</file>
+        <file>Icons/png/020-gps.png</file>
+        <file>Icons/png/021-draw.png</file>
+        <file>Icons/png/022-cogwheel.png</file>
+        <file>Icons/png/023-cancel-button.png</file>
+        <file>Icons/png/024-user-shape.png</file>
+        <file>Icons/png/025-add-plus-button.png</file>
+        <file>Icons/png/026-add-button-inside-black-circle.png</file>
+        <file>Icons/png/027-rounded-add-button.png</file>
+        <file>Icons/png/028-round-account-button-with-user-inside.png</file>
+        <file>Icons/png/029-turn-notifications-on-button.png</file>
+        <file>Icons/png/030-history-clock-button.png</file>
+        <file>Icons/png/031-notifications-button.png</file>
+        <file>Icons/png/032-play-arrow.png</file>
+        <file>Icons/png/033-check-box.png</file>
+        <file>Icons/png/034-close-button.png</file>
+        <file>Icons/png/035-favorite-heart-button.png</file>
+        <file>Icons/png/036-tick-inside-circle.png</file>
+        <file>Background/12.jpg</file>
+        <file>Background/13.jpg</file>
+        <file>Background/14.jpg</file>
+        <file>Background/15.jpg</file>
+        <file>Background/16.jpg</file>
     </qresource>
 </RCC>
