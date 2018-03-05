@@ -15,7 +15,6 @@ int m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, ypri
 int cont_rep;
 int vector[1500][1500], vector2[col][fil];
 float vector3[col][fil];
-//QCPColorScale *colorScale;
 double max = 0;
 
 QString nombrejugador;
@@ -28,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
     connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
-//    connect(mThread,&DuThread::actualizar,this,SLOT(on_pushButtonmostrar_clicked()));
     dialogoNew = new Dialog_nuevo;
     dialogoHR = new Dialog_HRate;
     dialogoNewCancha = new DialogNewCourt();
@@ -42,14 +40,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
     connect(dialogoHR,SIGNAL(senal()),this,SLOT(Serial_Desconect()));
     connect(dialogoHR,SIGNAL(finished(int)),this,SLOT(Serial_Desconect()));
-    //-----Plot----
-//    ui->plot->addGraph();
-//    colorScale = new QCPColorScale(ui->plot);
-//    ui->plot->plotLayout()->addElement(0, 1, colorScale);
-//    ui->plot->setBackground(Qt::lightGray);
-//    ui->plot->axisRect()->setBackground(Qt::white);
-//    ui->plot->xAxis->setVisible(false);
-//    ui->plot->yAxis->setVisible(false);
+    //--------------
+    connect(ui->actionserialConfig,SIGNAL(triggered(bool)),this,SLOT(on_action_Configurar_Conexi_n_triggered()));
+    connect(ui->actionCancha,SIGNAL(triggered(bool)),this,SLOT(on_action_Seleccionar_Cancha_triggered()));
+    connect(ui->actionAnalisis,SIGNAL(triggered(bool)),this,SLOT(on_actionMostrar_Analisis_triggered()));
+    connect(ui->actionJugador,SIGNAL(triggered(bool)),this,SLOT(on_actionNew_triggered()));
+    connect(ui->actionEquipo,SIGNAL(triggered(bool)),this,SLOT(on_action_Open_triggered()));
 
     initConfiguration();
 }
@@ -79,6 +75,7 @@ void MainWindow::mostrarTabla()
         ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
         ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
+        ui->tableWidgetdato->setItem(fila,5,new QTableWidgetItem(mostrar.value(6).toDate().toString("dd-MM-yyyy")));
         fila++;
     }
 }
@@ -100,31 +97,40 @@ void MainWindow::mostrarDatos()
     if(!mostrar.exec()){
         qDebug() << "ERROR! " << mostrar.lastError();
     }
-    int fila = 0;
     max = 0;
+    QDate fecha;
     ui->tableWidgetdato->setRowCount(0);
     while(mostrar.next()){
-        ui->tableWidgetdato->insertRow(fila);
-        ui->tableWidgetdato->setItem(fila,0,new QTableWidgetItem(mostrar.value(1).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,1,new QTableWidgetItem(mostrar.value(2).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        if(mostrar.value(1) == "C")
-            cont_rep++;
         int x = mostrar.value(3).toInt(&ok);
         int y = mostrar.value(2).toInt(&ok);
         int m = Mapeo_x(x,y);
         int n = Mapeo_y(x,y);
-//        addPoint(m, n);
         int j = m / div;
         int k = n / div;
         vector[m][n] = vector[m][n] + 1;
         vector2[j][k] = vector2[j][k] + 1;
         if((vector2[j][k] > max))
             max = vector2[j][k];
-//        qDebug() << j << k << vector2[j][k];
-        fila++;
+    }
+}
+
+void MainWindow::mostrarFechas()
+{
+    listaFechas.clear();
+    QString consulta;
+    consulta.append("SELECT * FROM ");
+    consulta.append(nombre);
+    QSqlQuery mostrar;
+    mostrar.prepare(consulta);
+    if(!mostrar.exec()){
+        qDebug() << "ERROR! " << mostrar.lastError();
+    }
+    QDate fecha;
+    while(mostrar.next()){
+        fecha = mostrar.value(6).toDate();
+        QString date = fecha.toString("dd-MM-yyyy");
+        if(!listaFechas.contains(date))
+            listaFechas.insert(0,date);
     }
 }
 
@@ -151,7 +157,6 @@ void MainWindow::initConfiguration()
         ui->labelCanchaSelected->setText(esquinas.nombreCancha);
         Serial_Conf(lastConfig.puerto);
         file->close();
-//        qDebug() << lastConfig.database << lastConfig.jugador << lastConfig.cancha << lastConfig.puerto;
     }
 }
 
@@ -214,7 +219,6 @@ void MainWindow::readFile(QString palabra)
 
 void MainWindow::Serial_Conf(QString puertoNombre)
 {
-    qDebug() << puertoNombre;
     serial->setPortName(puertoNombre);
     serial->setBaudRate(QSerialPort::Baud9600);
     serial->setDataBits(QSerialPort::Data8);
@@ -270,84 +274,23 @@ void MainWindow::Serial_Pedir()
     if(serial->bytesAvailable() >= 25){
         data.validez = serial->read(1);
         QString lat = serial->read(2);
-        int lat_minutos = serial->read(7).toInt(&ok) / 6;
+        int lat_minutos = serial->read(6).toInt(&ok);// / 6;
         lat.append(QString::number(lat_minutos));
         data.latitud = lat.toInt(&ok);
-        serial->read(1);
+        serial->read(2);
         QString lon = serial->read(2);
-        int lon_minutos = serial->read(7).toInt(&ok) / 6;
+        int lon_minutos = serial->read(6).toInt(&ok);// / 6;
         lon.append(QString::number(lon_minutos));
         data.longitud = lon.toInt(&ok);
+        serial->read(1);
         data.velocidad = serial->read(4).toInt(&ok);
         data.pulsacion = serial->read(1);
+        data.fecha.setDate(2010,11,19);
+//        data.fecha = QDate::currentDate();
         db->addData(nombre,data);
-        qDebug() << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion;
+        qDebug() << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion << data.fecha;
         dialogoHR->setHrPlayer(data.validez, data.velocidad);
     }
-}
-
-//void MainWindow::addPoint(double x, double y)
-//{
-//    qv_x.append(x);
-//    qv_y.append(y);
-//}
-
-//void MainWindow::clearData()
-//{
-//    qv_x.clear();
-//    qv_y.clear();
-//}
-
-//void MainWindow::plot()
-//{
-//    ui->plot->axisRect()->setupFullAxesBox(true);
-//    QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
-//    int nx = col;
-//    int ny = fil;
-//    double x, y, z;
-//    colorMap->data()->setSize(nx, ny);
-//    colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
-//    for (int xIndex = 0; xIndex < nx-1; xIndex++){
-//      for (int yIndex = 0; yIndex < ny-1; yIndex++){
-//        colorMap->data()->cellToCoord(xIndex, yIndex, &x, &y);
-//        z = vector3[xIndex][yIndex];
-//        colorMap->data()->setCell(x, y, z);
-//        if(z > max)
-//            max = z;
-//      }
-//    }
-//    qDebug() << max;
-//    colorMap->setColorScale(colorScale);
-//    colorScale->axis()->setRange(QCPRange(0,max));
-//    QCPColorGradient miGradiente;
-//    miGradiente.clearColorStops();
-//    miGradiente.setColorStopAt(0.0,QColor("Cyan"));
-//    miGradiente.setColorStopAt(0.1,QColor("Blue"));
-//    miGradiente.setColorStopAt(0.6,QColor("Yellow"));
-//    miGradiente.setColorStopAt(0.9,QColor("Orange"));
-//    miGradiente.setColorStopAt(1.0,QColor("Dark red"));
-//    colorMap->setGradient(miGradiente);
-////  rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
-//    colorMap->rescaleDataRange();
-////  make sure the axis rect and color scale synchronize their bottom and top margins (so they line up):
-//    QCPMarginGroup *marginGroup = new QCPMarginGroup(ui->plot);
-//    ui->plot->axisRect()->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-//    colorScale->setMarginGroup(QCP::msBottom|QCP::msTop, marginGroup);
-////  rescale the key (x) and value (y) axes so the whole color map is visible:
-//    ui->plot->rescaleAxes();
-//    ui->plot->xAxis->setVisible(false);
-//    ui->plot->yAxis->setVisible(false);
-//    ui->plot->replot();
-//    ui->plot->update();
-//}
-
-void MainWindow::on_pushButtonmostrar_clicked()
-{
-//    coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
-//    mostrarDatos();
-//    filtroMatricial();
-//    mostrarTabla();
-//    plot();
 }
 
 /*
@@ -365,7 +308,6 @@ void MainWindow::filtroMatricial()
     float A,B,C,D,E,F,G,H,I;
     int xlim = col - 1;
     int ylim = fil - 1;
-    qDebug() << xlim << ylim;
     for(int i=1;i<xlim;i++)
         for(int j=1;j<ylim;j++){
             if(vector2[i][j] > 0){
@@ -378,33 +320,24 @@ void MainWindow::filtroMatricial()
                 G = vector2[i-1][j+1];
                 H = vector2[i][j+1];
                 I = vector2[i+1][j+1];
-                A = (A + E)*0.3;
-                B = (B + E)*0.75;
-                C = (C + E)*0.3;
-                D = (D + E)*0.75;
-                F = (F + E)*0.75;
-                G = (G + E)*0.3;
-                H = (H + E)*0.75;
-                I = (I + E)*0.3;
-                vector3[i-1][j-1] = A;
-                vector3[i][j-1] = B;
-                vector3[i+1][j-1] = C;
-                vector3[i-1][j] = D;
+                vector3[i-1][j-1] = (A + E)*0.3;
+                vector3[i][j-1] = (B + E)*0.75;
+                vector3[i+1][j-1] = (C + E)*0.3;
+                vector3[i-1][j] = (D + E)*0.75;
                 vector3[i][j] = E;
-                vector3[i+1][j] = F;
-                vector3[i-1][j+1] = G;
-                vector3[i][j+1] = H;
-                vector3[i+1][j+1] = I;
-                qDebug() << A << B << C << D << " - " << E << " - " << F << G << H << I;
+                vector3[i+1][j] = (F + E)*0.75;
+                vector3[i-1][j+1] = (G + E)*0.3;
+                vector3[i][j+1] = (H + E)*0.75;
+                vector3[i+1][j+1] = (I + E)*0.3;
             }
         }
 }
 
 void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString esq4)
 {
-    //----corners----
-    //-31,747159, -60,515733
-    //separación de coordenadas reales
+        //----corners----
+        //-31,747159, -60,515733
+        //separación de coordenadas reales
     esq1.remove(QChar(','),Qt::CaseInsensitive);//.replace(",", ".");
     esq2.remove(QChar(','),Qt::CaseInsensitive);
     esq3.remove(QChar(','),Qt::CaseInsensitive);
@@ -421,16 +354,16 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     int x4 = esq4.right(8).toInt(&ok);
     esq4.chop(10);
     int y4 = esq4.right(8).toInt(&ok);
-    //mapeo de las esquinas
-    //cálculo del ángulo entre rectas
+        //mapeo de las esquinas
+        //cálculo del ángulo entre rectas
     float coseno = (y2 - Y1) / (sqrt(pow((y2 - Y1),2) + pow((X1 - x2),2)));
     fi_rad = qAcos(coseno);
     if((X1 - x2) < 0)
         alfa_rad = -fi_rad;
     else
         alfa_rad = fi_rad;
-    //coordenadas en el nuevo sistema
-    //esquinas
+        //coordenadas en el nuevo sistema
+        //esquinas
     m1 = 0;
     n1 = 0;
     m2 = Mapeo_x(x2,y2);
@@ -439,12 +372,6 @@ void MainWindow::coordenadas(QString esq1, QString esq2, QString esq3, QString e
     n3 = Mapeo_y(x3,y3);
     m4 = Mapeo_x(x4,y4);
     n4 = Mapeo_y(x4,y4);
-//    //disposición de los límites de los ejes
-//    clearData();
-//    addPoint(m1,n1);
-//    addPoint(m2,n2);
-//    addPoint(m3,n3);
-//    addPoint(m4,n4);
 }
 
 double MainWindow::Mapeo_x(double x, double y)
@@ -469,7 +396,6 @@ void MainWindow::on_pushButtonmanual_clicked()
     int y5 = punto_nuevo.right(8).toInt(&ok);
     m5 = Mapeo_x(x5,y5);
     n5 = Mapeo_y(x5,y5);
-//    addPoint(m5,n5);
     DbManager::DataBlock currentData;
     currentData.validez = "C";
     currentData.latitud = y5;
@@ -481,7 +407,6 @@ void MainWindow::on_pushButtonmanual_clicked()
 
 void MainWindow::on_pushButtonrandom_clicked()
 {
-//-31,747308, -60,514664//-31,747931, -60,514819//-31,747757, -60,515908//-31,747135, -60,515763
     int aleatorioy = (qrand() % 622) + 747308;
     int aleatoriox = (qrand() % 1098) + 514665;
     QString punto;
@@ -490,11 +415,6 @@ void MainWindow::on_pushButtonrandom_clicked()
     punto.append(", -60,");
     punto.append(QString::number(aleatoriox));
     ui->lineEditpunto->setText(punto);
-}
-
-void MainWindow::on_verticalSlider_max_actionTriggered(int action)
-{
-    ui->label_max->setText(QString::number(ui->verticalSlider_max->value()));
 }
 
 void MainWindow::on_action_Open_triggered()
@@ -563,7 +483,7 @@ void MainWindow::actualizarLista()
     ui->comboBoxtablas->clear();
     QStringList lista;
     lista = db->obtenerLista();
-    ui->comboBoxtablas->insertItem(1,"");
+    ui->comboBoxtablas->insertItem(0,"Seleccione un jugador");
     foreach (const QString &str, lista){
         if((str != "perfiles")&&(str != "sqlite_sequence")){
             QString name = str;
@@ -578,22 +498,21 @@ void MainWindow::actualizarLista()
 
 void MainWindow::on_comboBoxtablas_activated(const QString &arg1)
 {
-    lastConfig.jugador = arg1;
-    if(arg1 == ""){
-        ui->labelBusqueda->setPixmap(QPixmap(":/noPhoto.png"));
+    nombre = arg1;
+    if(arg1 != lastConfig.jugador)
+        lastConfig.jugador = arg1;
+    if(nombre.contains(" ")){
+        int u = nombre.indexOf(" ");
+        nombre.replace(u,1,"_");
+    }
+    if(db->buscarPerfil(nombre)){
+        DbManager::PerfilBlock q = db->obtenerPerfil();
+        QPixmap foto;
+        foto.loadFromData(q.photo);
+        ui->labelBusqueda->setPixmap(foto);
     }
     else{
-        nombre = arg1;
-        if(nombre.contains(" ")){
-            int u = nombre.indexOf(" ");
-            nombre.replace(u,1,"_");
-        }
-        if(db->buscarPerfil(nombre)){
-            DbManager::PerfilBlock q = db->obtenerPerfil();
-            QPixmap foto;
-            foto.loadFromData(q.photo);
-            ui->labelBusqueda->setPixmap(foto);
-        }
+        ui->labelBusqueda->setPixmap(QPixmap(":/noPhoto.png"));
     }
 }
 
@@ -613,6 +532,8 @@ void MainWindow::agregarCancha()
 
 void MainWindow::on_actionMostrar_Analisis_triggered()
 {
+    mostrarFechas();
+    dialogoGps->setListaFechas(listaFechas);
     coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
     mostrarDatos();
     filtroMatricial();
@@ -622,11 +543,13 @@ void MainWindow::on_actionMostrar_Analisis_triggered()
     for(int indice=0;indice<col;indice++)
         for(int jndice=0;jndice<fil;jndice++)
             vector3[indice][jndice] = 0;
+    connect(dialogoGps,SIGNAL(senal()),this,SLOT(buscarFecha()));
 }
 
 void MainWindow::on_action_Seleccionar_Cancha_triggered()
 {
     connect(dialogoSelectCourt,SIGNAL(senal()),this,SLOT(seleccionCancha()));
+    dialogoSelectCourt->actualizarCanchas();
     dialogoSelectCourt->setModal(true);
     dialogoSelectCourt->show();
 }
@@ -677,27 +600,47 @@ void MainWindow::on_actionSerialConect_triggered()
     }
 }
 
-void MainWindow::on_actionserialConfig_triggered()
+void MainWindow::buscarFecha()
 {
-    on_action_Configurar_Conexi_n_triggered();
+    coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
+    QDate fechaBuscada = dialogoGps->obtenerFecha();
+    if(listaFechas.contains(fechaBuscada.toString("dd-MM-yyyy")))
+    {
+        for(int indice=0;indice<col;indice++)
+            for(int jndice=0;jndice<fil;jndice++){
+                vector2[indice][jndice] = 0;
+                vector3[indice][jndice] = 0;
+            }
+        max = 0;
+        QString consulta;
+        consulta.append("SELECT latitud,longitud,velocidad,pulsacion,fecha FROM ");
+        consulta.append(nombre);
+        consulta.append(" WHERE fecha = (:fecha)");
+        QSqlQuery mostrar;
+        mostrar.prepare(consulta);
+        mostrar.bindValue(":fecha", fechaBuscada);
+        if(!mostrar.exec()){
+            qDebug() << "ERROR! " << mostrar.lastError();
+        }
+        while(mostrar.next()){
+            int x = mostrar.value(1).toInt(&ok);
+            int y = mostrar.value(0).toInt(&ok);
+            int m = Mapeo_x(x,y);
+            int n = Mapeo_y(x,y);
+            int j = m / div;
+            int k = n / div;
+//            vector[m][n] = vector[m][n] + 1;
+            vector2[j][k] = vector2[j][k] + 1;
+            if((vector2[j][k] > max))
+                max = vector2[j][k];
+        }
+        filtroMatricial();
+        dialogoGps->plot(vector3,fil);
+    }
 }
 
-void MainWindow::on_actionEquipo_triggered()
+void MainWindow::on_pushButton_clicked()
 {
-    on_action_Open_triggered();
-}
-
-void MainWindow::on_actionJugador_triggered()
-{
-    on_actionNew_triggered();
-}
-
-void MainWindow::on_actionAnalisis_triggered()
-{
-    on_actionMostrar_Analisis_triggered();
-}
-
-void MainWindow::on_actionCancha_triggered()
-{
-    on_action_Seleccionar_Cancha_triggered();
+    mostrarTabla();
+    mostrarFechas();
 }

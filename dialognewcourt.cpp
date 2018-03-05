@@ -37,10 +37,10 @@ void DialogNewCourt::limpiarCancha()
 
 void DialogNewCourt::on_pushButtonMaps_clicked()
 {
-    connect(clipBoard,SIGNAL(changed(QClipboard::Mode)),this,SLOT(copiaDatos()));
     connect(ui->lineEditcorner4,SIGNAL(textChanged(QString)),this,SLOT(modificado()));
     contador = 0;
     QDesktopServices::openUrl(QUrl("https://www.bing.com/maps", QUrl::TolerantMode));
+    connect(clipBoard,SIGNAL(dataChanged()),this,SLOT(copiaDatos()));
 }
 
 void DialogNewCourt::copiaDatos()
@@ -57,12 +57,12 @@ void DialogNewCourt::copiaDatos()
             ui->lineEditcorner3->setText(clipBoard->text());
             break;
         case 4:
+            disconnect(clipBoard,0,this,0);
             ui->lineEditcorner4->setText(clipBoard->text());
             break;
     }
     if(contador > 3){
         contador = 0;
-        disconnect(clipBoard,0,this,0);
     }
 }
 
@@ -83,6 +83,7 @@ void DialogNewCourt::on_pushButtonAceptar_clicked()
 
 void DialogNewCourt::on_pushButtonCancelar_clicked()
 {
+    disconnect(clipBoard,0,this,0);
     ui->lineEditcancha->clear();
     ui->lineEditcorner1->clear();
     ui->lineEditcorner2->clear();

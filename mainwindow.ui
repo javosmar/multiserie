@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
-    <height>369</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,9 +33,9 @@
    <widget class="QTableWidget" name="tableWidgetdato">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>80</y>
-      <width>256</width>
+      <x>240</x>
+      <y>170</y>
+      <width>651</width>
       <height>192</height>
      </rect>
     </property>
@@ -97,6 +97,14 @@
       <set>AlignCenter</set>
      </property>
     </column>
+    <column>
+     <property name="text">
+      <string>Fecha</string>
+     </property>
+     <property name="textAlignment">
+      <set>AlignCenter</set>
+     </property>
+    </column>
    </widget>
    <widget class="QLineEdit" name="lineEditpunto">
     <property name="geometry">
@@ -134,48 +142,13 @@
      <string>rand</string>
     </property>
    </widget>
-   <widget class="QSlider" name="verticalSlider_max">
-    <property name="geometry">
-     <rect>
-      <x>570</x>
-      <y>50</y>
-      <width>16</width>
-      <height>84</height>
-     </rect>
-    </property>
-    <property name="minimum">
-     <number>1</number>
-    </property>
-    <property name="maximum">
-     <number>999</number>
-    </property>
-    <property name="sliderPosition">
-     <number>1</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_max">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>140</y>
-      <width>47</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>9</x>
       <y>9</y>
-      <width>196</width>
-      <height>121</height>
+      <width>206</width>
+      <height>133</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -247,35 +220,11 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="pushButtonmostrar">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>100</y>
-      <width>75</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Mostrar</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>212</x>
-      <y>9</y>
+      <x>230</x>
+      <y>10</y>
       <width>231</width>
       <height>61</height>
      </rect>
@@ -325,8 +274,8 @@
    <widget class="QLabel" name="labelBusqueda">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>140</y>
+      <x>40</x>
+      <y>170</y>
       <width>128</width>
       <height>128</height>
      </rect>
@@ -338,10 +287,13 @@
      </sizepolicy>
     </property>
     <property name="frameShape">
-     <enum>QFrame::NoFrame</enum>
+     <enum>QFrame::Panel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Plain</enum>
+     <enum>QFrame::Raised</enum>
+    </property>
+    <property name="lineWidth">
+     <number>2</number>
     </property>
     <property name="text">
      <string/>
@@ -356,24 +308,35 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>30</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>mostrar</string>
+    </property>
+   </widget>
    <zorder>tableWidgetdato</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>pushButtonmostrar</zorder>
    <zorder>pushButtonmanual</zorder>
    <zorder>lineEditpunto</zorder>
    <zorder>pushButtonrandom</zorder>
-   <zorder>verticalSlider_max</zorder>
-   <zorder>label_max</zorder>
    <zorder>labelBusqueda</zorder>
+   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>604</width>
-     <height>18</height>
+     <width>1024</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

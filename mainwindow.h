@@ -48,13 +48,10 @@ public:
         QString cancha;
         QString puerto;
     };
-    //----Plot----
-    void addPoint(double x, double y);
-    void clearData();
-    void plot();
     //------------
     void mostrarTabla();
     void mostrarDatos();
+    void mostrarFechas();
 
 private slots:
     void initConfiguration();
@@ -67,14 +64,12 @@ private slots:
     void Serial_Desconect();
     void Serial_Error();
     void Serial_Pedir();
-    void on_pushButtonmostrar_clicked();
     void filtroMatricial();
     void coordenadas(QString, QString, QString, QString);
     double Mapeo_x(double, double);
     double Mapeo_y(double, double);
     void on_pushButtonmanual_clicked();
     void on_pushButtonrandom_clicked();
-    void on_verticalSlider_max_actionTriggered(int action);
     void on_action_Open_triggered();
     void ejecutarNuevo();
     void on_actionNew_triggered();
@@ -90,12 +85,9 @@ private slots:
     void setCom();
     void on_actionClose_triggered();
     void on_actionSerialConect_triggered();
-    void on_actionserialConfig_triggered();
-    void on_actionEquipo_triggered();
-    void on_actionJugador_triggered();
-    void on_actionAnalisis_triggered();
+    void buscarFecha();
 
-    void on_actionCancha_triggered();
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -112,6 +104,7 @@ private:
     QString path, nombre;
     QFile *file;
     QStringList listaCanchas;
+    QStringList listaFechas;
     corners esquinas;
     int ancho,alto;
     Config lastConfig;

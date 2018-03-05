@@ -101,7 +101,7 @@
           </font>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -228,6 +228,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEditnombre</tabstop>
+  <tabstop>dateEditNacimiento</tabstop>
+  <tabstop>spinBoxPeso</tabstop>
+  <tabstop>spinBoxAltura</tabstop>
+  <tabstop>pushButtonPhoto</tabstop>
+ </tabstops>
  <resources>
   <include location="recurso.qrc"/>
  </resources>

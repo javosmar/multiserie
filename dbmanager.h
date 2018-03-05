@@ -14,6 +14,7 @@ public:
         int longitud;
         int velocidad;
         QString pulsacion;
+        QDate fecha;
     };
 
     struct PerfilBlock{

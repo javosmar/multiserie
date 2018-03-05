@@ -17,6 +17,8 @@ Dialog_Gps::Dialog_Gps(QWidget *parent) :
     ui->plot->axisRect()->setBackground(Qt::white);
     ui->plot->xAxis->setVisible(false);
     ui->plot->yAxis->setVisible(false);
+    ui->plot->yAxis2->setVisible(false);
+    ui->plot->xAxis2->setVisible(false);
 }
 
 Dialog_Gps::~Dialog_Gps()
@@ -29,11 +31,14 @@ void Dialog_Gps::on_pushButtonCerrar_clicked()
     this->close();
 }
 
-void Dialog_Gps::plot(float vector[][64], int columnas)
+void Dialog_Gps::plot(float vector[][64], int filas)
 {
+//    ui->plot->graph(0)->data().clear();
+    ui->plot->clearGraphs();
+//    ui->plot->replot();
     ui->plot->axisRect()->setupFullAxesBox(true);
     QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
-    int nx = columnas;
+    int nx = filas;
     int ny = 64;
     double x, y, z;
     colorMap->data()->setSize(nx, ny);
@@ -50,6 +55,7 @@ void Dialog_Gps::plot(float vector[][64], int columnas)
     qDebug() << max;
     colorMap->setColorScale(colorScale);
     colorScale->axis()->setRange(QCPRange(0,max));
+    colorScale->axis()->setVisible(false);
     QCPColorGradient miGradiente;
     miGradiente.clearColorStops();
     miGradiente.setColorStopAt(0.0,QColor("Cyan"));
@@ -70,4 +76,31 @@ void Dialog_Gps::plot(float vector[][64], int columnas)
     ui->plot->yAxis->setVisible(false);
     ui->plot->replot();
     ui->plot->update();
+}
+
+void Dialog_Gps::setListaFechas(QStringList listaFechas)
+{
+    ui->comboBoxFecha->clear();
+    ui->comboBoxFecha->insertItem(0,"Seleccione la fecha del entrenamiento");
+    foreach (const QString &str, listaFechas)
+        ui->comboBoxFecha->insertItem(1,str);
+}
+
+QDate Dialog_Gps::obtenerFecha()
+{
+    return selectedFecha;
+}
+
+void Dialog_Gps::on_comboBoxFecha_activated(const QString &arg1)
+{
+    bool ok;
+    int dia, mes, ano;
+    QString date = arg1;
+    ano = date.right(4).toInt(&ok);
+    date.chop(5);
+    mes = date.right(2).toInt(&ok);
+    date.chop(3);
+    dia = date.toInt(&ok);
+    selectedFecha.setDate(ano,mes,dia);
+    emit senal();
 }

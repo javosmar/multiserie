@@ -44,7 +44,8 @@ bool DbManager::createTable(QString tabla)
                     "latitud INTEGER NOT NULL,"
                     "longitud INTEGER NOT NULL,"
                     "velocidad INTEGER NOT NULL,"
-                    "pulsacion VARCHAR(15));");
+                    "pulsacion VARCHAR(15),"
+                    "fecha BLOB);");
     query.prepare(consulta);
     if (!query.exec())
     {
@@ -80,8 +81,8 @@ bool DbManager::addData(QString tabla, DataBlock data)
         QString pedido;
         pedido.append("INSERT INTO ");
         pedido.append(tabla);
-        pedido.append(" (validez,latitud,longitud,velocidad,pulsacion) "
-                      "VALUES (:validez,:latitud,:longitud,:velocidad,:pulsacion)");
+        pedido.append(" (validez,latitud,longitud,velocidad,pulsacion,fecha) "
+                      "VALUES (:validez,:latitud,:longitud,:velocidad,:pulsacion,:fecha)");
         QSqlQuery queryAdd;
         queryAdd.prepare(pedido);
         queryAdd.bindValue(":validez", data.validez);
@@ -89,6 +90,7 @@ bool DbManager::addData(QString tabla, DataBlock data)
         queryAdd.bindValue(":longitud", data.longitud);
         queryAdd.bindValue(":velocidad", data.velocidad);
         queryAdd.bindValue(":pulsacion", data.pulsacion);
+        queryAdd.bindValue(":fecha", data.fecha);
         if(queryAdd.exec())
         {
             success = true;
@@ -107,11 +109,6 @@ bool DbManager::addData(QString tabla, DataBlock data)
 
 QStringList DbManager::obtenerLista()
 {
-//    QStringList lista;
-//    lista = m_db.tables();
-//    foreach (const QString &str, lista){
-//        if(str.contains("perfiles")|str.contains("sqlite_sequences"))
-//            lista.
       return m_db.tables();
 }
 
@@ -180,9 +177,7 @@ bool DbManager::createTablePerfiles()
     consulta.append("(id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "nombre VARCHAR(15),"
                     "photo LONGBLOB,"
-                    "dia INTEGER NOT NULL,"
-                    "mes INTEGER NOT NULL,"
-                    "ano INTEGER NOT NULL,"
+                    "fecha BLOB,"
                     "altura INTEGER NOT NULL,"
                     "peso INTEGER NOT NULL);");
     query.prepare(consulta);
@@ -203,15 +198,13 @@ bool DbManager::addPerfil(PerfilBlock data)
     int dia, mes, ano;
     data.fecha.getDate(&ano,&mes,&dia);
     pedido.append("INSERT INTO perfiles");
-    pedido.append(" (nombre,photo,dia,mes,ano,altura,peso) "
-                  "VALUES (:nombre,:photo,:dia,:mes,:ano,:altura,:peso)");
+    pedido.append(" (nombre,photo,fecha,altura,peso) "
+                  "VALUES (:nombre,:photo,:fecha,:altura,:peso)");
     QSqlQuery queryAdd;
     queryAdd.prepare(pedido);
     queryAdd.bindValue(":nombre", data.nombre);
     queryAdd.bindValue(":photo", data.photo);
-    queryAdd.bindValue(":dia",dia);
-    queryAdd.bindValue(":mes",mes);
-    queryAdd.bindValue(":ano",ano);
+    queryAdd.bindValue(":fecha", data.fecha);
     queryAdd.bindValue(":altura",data.altura);
     queryAdd.bindValue(":peso",data.peso);
     if(queryAdd.exec())
@@ -236,7 +229,7 @@ bool DbManager::buscarPerfil(const QString& name)
     bool ok;
     int dia, mes, ano;
     QSqlQuery checkQuery;
-    checkQuery.prepare("SELECT id, nombre, photo FROM perfiles WHERE nombre = (:name)");
+    checkQuery.prepare("SELECT id, nombre, photo, fecha, peso, altura FROM perfiles WHERE nombre = (:name)");
     checkQuery.bindValue(":name", name);
     if (checkQuery.exec())
     {
@@ -245,12 +238,9 @@ bool DbManager::buscarPerfil(const QString& name)
             exists = true;
             perfilBuscado.nombre = checkQuery.value(1).toString();
             perfilBuscado.photo = checkQuery.value(2).toByteArray();
-            dia = checkQuery.value(3).toInt(&ok);
-            mes = checkQuery.value(4).toInt(&ok);
-            ano = checkQuery.value(5).toInt(&ok);
-            perfilBuscado.fecha.setDate(ano,mes,dia);
-            perfilBuscado.altura = checkQuery.value(6).toInt(&ok);
-            perfilBuscado.peso = checkQuery.value(7).toInt(&ok);
+            perfilBuscado.fecha = checkQuery.value(3).toDate();
+            perfilBuscado.altura = checkQuery.value(4).toInt(&ok);
+            perfilBuscado.peso = checkQuery.value(5).toInt(&ok);
         }
     }
     else
