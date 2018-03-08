@@ -13,7 +13,7 @@ public:
         int latitud;
         int longitud;
         int velocidad;
-        QString pulsacion;
+        int pulsacion;
         QDate fecha;
     };
 
@@ -41,6 +41,8 @@ public:
 
     bool personExists(const QString& name) const;
     bool removeAllPersons();
+
+
 
 private:
     QSqlDatabase m_db;

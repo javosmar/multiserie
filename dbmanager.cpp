@@ -44,7 +44,7 @@ bool DbManager::createTable(QString tabla)
                     "latitud INTEGER NOT NULL,"
                     "longitud INTEGER NOT NULL,"
                     "velocidad INTEGER NOT NULL,"
-                    "pulsacion VARCHAR(15),"
+                    "pulsacion INTEGER NOT NULL,"
                     "fecha BLOB);");
     query.prepare(consulta);
     if (!query.exec())
@@ -237,7 +237,7 @@ bool DbManager::buscarPerfil(const QString& name)
         {
             exists = true;
             perfilBuscado.nombre = checkQuery.value(1).toString();
-            perfilBuscado.photo = checkQuery.value(2).toByteArray();
+            perfilBuscado.photo = checkQuery.value(2).toByteArray().toBase64();
             perfilBuscado.fecha = checkQuery.value(3).toDate();
             perfilBuscado.altura = checkQuery.value(4).toInt(&ok);
             perfilBuscado.peso = checkQuery.value(5).toInt(&ok);

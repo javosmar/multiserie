@@ -52,6 +52,25 @@ public:
     void mostrarTabla();
     void mostrarDatos();
     void mostrarFechas();
+    //-----------
+    Q_INVOKABLE bool nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso);
+    Q_INVOKABLE QString cargarPhoto_clicked();
+    Q_INVOKABLE bool buscarJugador(const QString &buscado);
+    Q_INVOKABLE QStringList obtenerJugador();
+    Q_INVOKABLE QStringList obtenerListaJugadores();
+    Q_INVOKABLE void on_comboBoxtablas_activated(const QString &arg1);
+    Q_INVOKABLE bool on_actionSerialConect_triggered();
+    Q_INVOKABLE void on_actionNew_triggered();
+    Q_INVOKABLE void on_actionMostrar_Analisis_triggered();
+    Q_INVOKABLE QString obtenerPulsacionMaxima(int numero);
+    Q_INVOKABLE QString obtenerPulsacionMinima(int numero);
+    Q_INVOKABLE void calculoPrevioMaxMin();
+
+
+signals:
+    void serialConected();
+    void serialDesconected();
+    void validador(const QString validez);
 
 private slots:
     void initConfiguration();
@@ -72,22 +91,27 @@ private slots:
     void on_pushButtonrandom_clicked();
     void on_action_Open_triggered();
     void ejecutarNuevo();
-    void on_actionNew_triggered();
     void ejecutarNuevoJugador();
     void actualizarLista();
-    void on_comboBoxtablas_activated(const QString &arg1);
     void on_actionAdd_Court_triggered();
     void agregarCancha();
-    void on_actionMostrar_Analisis_triggered();
+//    void on_actionMostrar_Analisis_triggered();
     void on_action_Seleccionar_Cancha_triggered();
     void seleccionCancha();
     void on_action_Configurar_Conexi_n_triggered();
     void setCom();
     void on_actionClose_triggered();
-    void on_actionSerialConect_triggered();
     void buscarFecha();
 
     void on_pushButton_clicked();
+
+    void openDatabase();
+    QString quitarEspacio(QString nombre);
+    QString agregarEspacio(QString nombre);
+    QDate formatoFecha(QString fecha);
+    void pulsacionMaxMin(const QString &name);
+    int serialCamiseta(const QString &player);
+    QString nombreCamiseta(int camiseta);
 
 private:
     Ui::MainWindow *ui;
@@ -101,13 +125,16 @@ private:
     Dialog_Conexion *dialogoConexion;
     Dialog_Gps *dialogoGps;
     DbManager *db;
-    QString path, nombre;
+    QString path, nombre, pathFoto;
     QFile *file;
     QStringList listaCanchas;
     QStringList listaFechas;
+    QStringList listaJugadores;
     corners esquinas;
     int ancho,alto;
     Config lastConfig;
+    DbManager::PerfilBlock perfilBuscado, perfilNuevo;
+    int maxPulso[11], minPulso[11];
 };
 
 #endif // MAINWINDOW_H

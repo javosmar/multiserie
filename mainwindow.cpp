@@ -3,6 +3,7 @@
 #include "duthread.h"
 #include "math.h"
 #include <dbmanager.h>
+#include <QQmlContext>
 
 #define col 110
 #define fil 64
@@ -33,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dialogoSelectCourt = new Dialog_SelectCourt;
     dialogoConexion = new Dialog_Conexion;
     dialogoGps = new Dialog_Gps;
-    ui->actionJugador->setEnabled(false);
-    ui->actionNew->setEnabled(false);
     //----Serial----
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
@@ -47,7 +46,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionJugador,SIGNAL(triggered(bool)),this,SLOT(on_actionNew_triggered()));
     connect(ui->actionEquipo,SIGNAL(triggered(bool)),this,SLOT(on_action_Open_triggered()));
 
-    initConfiguration();
+    ui->quickWidget->rootContext()->setContextProperty("mainWidget",this);
+    ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/widgetPulsacion.qml")));
+
+    this->showMaximized();
+    openDatabase();
+
+//    initConfiguration();
 }
 
 MainWindow::~MainWindow()
@@ -228,7 +233,7 @@ void MainWindow::Serial_Conf(QString puertoNombre)
     lastConfig.puerto = puertoNombre;
     if(!conf){
         conf = true;
-//        on_actionSerialConect_triggered();
+        on_actionSerialConect_triggered();
     }
 }
 
@@ -236,12 +241,16 @@ void MainWindow::Serial_Conect()
 {
     if((serial->open(QIODevice::ReadWrite)))
     {
-        qDebug() << "puerto abierto";
         estado_serial = true;
         serial->write("A");
         mThread->start(QThread::LowestPriority);
-        dialogoHR->show();
+//        dialogoHR->show();
+        for(int i=0;i<11;i++){
+            maxPulso[i] = 0;
+            minPulso[i] = 150;
+        }
         ui->actionSerialConect->setIcon(QPixmap("://Icons/png/010-player.png"));
+        emit serialConected();
     }
     else{
         Serial_Error();
@@ -255,8 +264,8 @@ void MainWindow::Serial_Desconect()
     serial->close();
     estado_serial = false;
     mThread->terminate();
-//    mostrarDatos();
     ui->actionSerialConect->setIcon(QPixmap("://Icons/png/032-play-arrow.png"));
+    emit serialDesconected();
 }
 
 void MainWindow::Serial_Error()
@@ -270,6 +279,7 @@ void MainWindow::Serial_Error()
 
 void MainWindow::Serial_Pedir()
 {
+    int n;
     DbManager::DataBlock data;
     if(serial->bytesAvailable() >= 25){
         data.validez = serial->read(1);
@@ -284,12 +294,17 @@ void MainWindow::Serial_Pedir()
         data.longitud = lon.toInt(&ok);
         serial->read(1);
         data.velocidad = serial->read(4).toInt(&ok);
-        data.pulsacion = serial->read(1);
-        data.fecha.setDate(2010,11,19);
-//        data.fecha = QDate::currentDate();
+        serial->read(1);                            //pulsacion
+        data.pulsacion = (qrand() % 90) + 60;
+        data.fecha = QDate::currentDate();
+        n = serialCamiseta(data.validez);
+        if(data.pulsacion < minPulso[n])
+            minPulso[n] = data.pulsacion;
+        if(data.pulsacion > maxPulso[n])
+            maxPulso[n] = data.pulsacion;
+        nombre = nombreCamiseta(n);
         db->addData(nombre,data);
-        qDebug() << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion << data.fecha;
-        dialogoHR->setHrPlayer(data.validez, data.velocidad);
+//        dialogoHR->setHrPlayer(data.validez, data.velocidad);
     }
 }
 
@@ -401,7 +416,7 @@ void MainWindow::on_pushButtonmanual_clicked()
     currentData.latitud = y5;
     currentData.longitud = x5;
     currentData.velocidad = 125;
-    currentData.pulsacion = "@";
+    currentData.pulsacion = 75;
     db->addData(nombre,currentData);
 }
 
@@ -459,10 +474,7 @@ void MainWindow::ejecutarNuevoJugador()
     Dialog_nuevo::perfil p = dialogoNew->obtenerPerfil();
     QString cadena;
     cadena = p.nombre;
-    if(cadena.contains(" ")){
-        int u = cadena.indexOf(" ");
-        cadena.replace(u,1,"_");
-    }
+    cadena = quitarEspacio(cadena);
     if(db->createTable(cadena)){
         ui->actionSerialConect->setEnabled(true);
         actualizarLista();
@@ -481,10 +493,9 @@ void MainWindow::ejecutarNuevoJugador()
 void MainWindow::actualizarLista()
 {
     ui->comboBoxtablas->clear();
-    QStringList lista;
-    lista = db->obtenerLista();
+    listaJugadores = db->obtenerLista();
     ui->comboBoxtablas->insertItem(0,"Seleccione un jugador");
-    foreach (const QString &str, lista){
+    foreach (const QString &str, listaJugadores){
         if((str != "perfiles")&&(str != "sqlite_sequence")){
             QString name = str;
             if(name.contains("_")){
@@ -499,20 +510,12 @@ void MainWindow::actualizarLista()
 void MainWindow::on_comboBoxtablas_activated(const QString &arg1)
 {
     nombre = arg1;
-    if(arg1 != lastConfig.jugador)
-        lastConfig.jugador = arg1;
-    if(nombre.contains(" ")){
-        int u = nombre.indexOf(" ");
-        nombre.replace(u,1,"_");
-    }
+    nombre = quitarEspacio(nombre);
     if(db->buscarPerfil(nombre)){
-        DbManager::PerfilBlock q = db->obtenerPerfil();
-        QPixmap foto;
-        foto.loadFromData(q.photo);
-        ui->labelBusqueda->setPixmap(foto);
+
     }
     else{
-        ui->labelBusqueda->setPixmap(QPixmap(":/noPhoto.png"));
+
     }
 }
 
@@ -544,6 +547,16 @@ void MainWindow::on_actionMostrar_Analisis_triggered()
         for(int jndice=0;jndice<fil;jndice++)
             vector3[indice][jndice] = 0;
     connect(dialogoGps,SIGNAL(senal()),this,SLOT(buscarFecha()));
+}
+
+QString MainWindow::obtenerPulsacionMaxima(int numero)
+{
+    return QString::number(maxPulso[numero]);
+}
+
+QString MainWindow::obtenerPulsacionMinima(int numero)
+{
+    return QString::number(minPulso[numero]);
 }
 
 void MainWindow::on_action_Seleccionar_Cancha_triggered()
@@ -584,7 +597,7 @@ void MainWindow::on_actionClose_triggered()
     close();
 }
 
-void MainWindow::on_actionSerialConect_triggered()
+bool MainWindow::on_actionSerialConect_triggered()
 {
     if(!conf){
         on_action_Configurar_Conexi_n_triggered();
@@ -592,12 +605,12 @@ void MainWindow::on_actionSerialConect_triggered()
     else{
         if(estado_serial){
             Serial_Desconect();
-//            mostrarDatos();
         }
         else{
             Serial_Conect();
         }
     }
+    return estado_serial;
 }
 
 void MainWindow::buscarFecha()
@@ -643,4 +656,211 @@ void MainWindow::on_pushButton_clicked()
 {
     mostrarTabla();
     mostrarFechas();
+}
+
+//----------------------
+
+bool MainWindow::nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso)
+{
+    QString nuevoNombre = quitarEspacio(nombre);
+    perfilNuevo.nombre = nuevoNombre;
+    perfilNuevo.fecha = formatoFecha(fecha);
+    perfilNuevo.altura = altura.toInt(&ok);
+    perfilNuevo.peso = peso.toInt(&ok);
+    bool flag1 = db->addPerfil(perfilNuevo);
+    bool flag2 = db->createTable(nuevoNombre);
+    bool flag = flag1&&flag2;
+    return flag;
+}
+
+bool MainWindow::buscarJugador(const QString &buscado)
+{
+    QString buscar = quitarEspacio(buscado);
+    bool flagEncontrado = db->buscarPerfil(buscar);
+    perfilBuscado = db->obtenerPerfil();
+    perfilBuscado.nombre = agregarEspacio(perfilBuscado.nombre);
+    return flagEncontrado;
+}
+
+QStringList MainWindow::obtenerJugador()
+{
+    QStringList perfilEncontrado;
+    perfilEncontrado.append(perfilBuscado.nombre);
+    perfilEncontrado.append(perfilBuscado.fecha.toString("dd-MM-yyyy"));
+    perfilEncontrado.append(QString::number(perfilBuscado.altura));
+    perfilEncontrado.append(QString::number(perfilBuscado.peso));
+    perfilEncontrado.append(QString(perfilBuscado.photo));
+    return perfilEncontrado;
+}
+
+QStringList MainWindow::obtenerListaJugadores()
+{
+    listaJugadores = db->obtenerLista();
+    if(listaJugadores.contains("perfiles")){
+        int x = listaJugadores.indexOf("perfiles");
+        listaJugadores.removeAt(x);
+    }
+    if(listaJugadores.contains("sqlite_sequence")){
+        int x = listaJugadores.indexOf("sqlite_sequence");
+        listaJugadores.removeAt(x);
+    }
+    return listaJugadores;
+}
+
+void MainWindow::openDatabase()
+{
+    db = new DbManager("databaseTeam.sqlite");
+    if(!db->isOpen()){
+        qDebug() << "La database no pudo abrirse";
+    }
+    else {
+        db->createTablePerfiles();
+    }
+}
+
+QString MainWindow::quitarEspacio(QString nombre)
+{
+    if(nombre.contains(" ")){
+        int u = nombre.indexOf(" ");
+        nombre.replace(u,1,"_");
+    }
+    return nombre;
+}
+
+QString MainWindow::agregarEspacio(QString nombre)
+{
+    if(nombre.contains("_")){
+        int u = nombre.indexOf("_");
+        nombre.replace(u,1," ");
+    }
+    return nombre;
+}
+
+QDate MainWindow::formatoFecha(QString fecha)
+{
+    int dia, mes, ano;
+    ano = fecha.right(4).toInt(&ok);
+    fecha.chop(5);
+    mes = fecha.right(2).toInt(&ok);
+    fecha.chop(3);
+    dia = fecha.toInt(&ok);
+    QDate natalicio;
+    natalicio.setDate(ano,mes,dia);
+    return natalicio;
+}
+
+void MainWindow::pulsacionMaxMin(const QString &name)
+{
+
+}
+
+int MainWindow::serialCamiseta(const QString &player)
+{
+    int camiseta;
+    if(player == "A")
+        camiseta = 0;
+    else if(player == "B")
+        camiseta = 1;
+    else if(player == "C")
+        camiseta = 2;
+    else if(player == "D")
+        camiseta = 3;
+    else if(player == "E")
+        camiseta = 4;
+    else if(player == "F")
+        camiseta = 5;
+    else if(player == "G")
+        camiseta = 6;
+    else if(player == "H")
+        camiseta = 7;
+    else if(player == "I")
+        camiseta = 8;
+    else if(player == "J")
+        camiseta = 9;
+    else if(player == "K")
+        camiseta = 10;
+    return camiseta;
+}
+
+QString MainWindow::nombreCamiseta(int camiseta)
+{
+    QString jugador;
+    switch(camiseta){
+        case 0:
+            jugador = listaJugadores[0];
+            break;
+        case 1:
+            jugador = listaJugadores[1];
+            break;
+        case 2:
+            jugador = listaJugadores[2];
+            break;
+        case 3:
+            jugador = listaJugadores[3];
+            break;
+        case 4:
+            jugador = listaJugadores[4];
+            break;
+        case 5:
+            jugador = listaJugadores[5];
+            break;
+        case 6:
+            jugador = listaJugadores[6];
+            break;
+        case 7:
+            jugador = listaJugadores[7];
+            break;
+        case 8:
+            jugador = listaJugadores[8];
+            break;
+        case 9:
+            jugador = listaJugadores[9];
+            break;
+        case 10:
+            jugador = listaJugadores[10];
+            break;
+        default:
+            break;
+    }
+    return jugador;
+}
+
+void MainWindow::calculoPrevioMaxMin()
+{
+    QString name, consulta;
+    for(int i = 0; i<11; i++){
+        name = nombreCamiseta(i);
+        consulta.append("SELECT pulsacion FROM ");
+        consulta.append(name);
+        QSqlQuery mostrar;
+        mostrar.prepare(consulta);
+        if(!mostrar.exec()){
+            qDebug() << "ERROR! " << mostrar.lastError();
+        }
+        int pulso;
+        maxPulso[i] = 0;
+        minPulso[i] = 150;
+        while(mostrar.next()){
+            pulso = mostrar.value(0).toInt(&ok);
+            if(pulso < minPulso[i])
+                minPulso[i] = pulso;
+            if(pulso > maxPulso[i])
+                maxPulso[i] = pulso;
+        }
+    }
+}
+
+QString MainWindow::cargarPhoto_clicked()
+{
+    pathFoto = QFileDialog::getOpenFileName(
+                this,
+                "GPSport - Seleccionar una foto de perfil",
+                "Users/javos/Documents/git/multiserie/",
+                "Imágenes (*.jpg;*.jpeg;*.png);;All Files (*.*)");
+    if(!pathFoto.isNull()){
+        QFile file(pathFoto);
+        file.open(QIODevice::ReadOnly);
+        perfilNuevo.photo = file.readAll();
+    }
+    return QString(perfilNuevo.photo.toBase64());
 }

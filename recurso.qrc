@@ -70,5 +70,9 @@
         <file>Background/14.jpg</file>
         <file>Background/15.jpg</file>
         <file>Background/16.jpg</file>
+        <file>widgetPulsacion.qml</file>
+        <file>Background/munich-allianz-arena-120289.jpeg</file>
+        <file>Background/Soccer-Field-Night.jpg</file>
+        <file>Icons/heart.png</file>
     </qresource>
 </RCC>
