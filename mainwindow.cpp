@@ -5,10 +5,6 @@
 #include <dbmanager.h>
 #include <QQmlContext>
 
-#define col 110
-#define fil 64
-#define div 10
-
 bool estado_serial = false, conf = false, pedido = false, bandera = false, dato_valido = false, ok;
 double fi_rad, alfa_rad;
 int m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima, X1, Y1;  //esquinas mapeadas
@@ -27,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
-    connect(mThread,&DuThread::valorCambiado, ui->progressBarserie, &QProgressBar::setValue);
     dialogoNew = new Dialog_nuevo;
     dialogoHR = new Dialog_HRate;
     dialogoNewCancha = new DialogNewCourt();
@@ -44,45 +39,20 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionCancha,SIGNAL(triggered(bool)),this,SLOT(on_action_Seleccionar_Cancha_triggered()));
     connect(ui->actionAnalisis,SIGNAL(triggered(bool)),this,SLOT(on_actionMostrar_Analisis_triggered()));
     connect(ui->actionJugador,SIGNAL(triggered(bool)),this,SLOT(on_actionNew_triggered()));
-    connect(ui->actionEquipo,SIGNAL(triggered(bool)),this,SLOT(on_action_Open_triggered()));
-
+    //-----QML------
     ui->quickWidget->rootContext()->setContextProperty("mainWidget",this);
     ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/widgetPulsacion.qml")));
 
-    this->showMaximized();
+//    this->showMaximized();
     openDatabase();
 
-//    initConfiguration();
+    initConfiguration();
 }
 
 MainWindow::~MainWindow()
 {
     lastConfiguration();
     delete ui;
-}
-
-void MainWindow::mostrarTabla()
-{
-    QString consulta;
-    consulta.append("SELECT * FROM ");
-    consulta.append(nombre);
-    QSqlQuery mostrar;
-    mostrar.prepare(consulta);
-    if(!mostrar.exec()){
-        qDebug() << "ERROR! " << mostrar.lastError();
-    }
-    int fila = 0;
-    ui->tableWidgetdato->setRowCount(0);
-    while(mostrar.next()){
-        ui->tableWidgetdato->insertRow(fila);
-        ui->tableWidgetdato->setItem(fila,0,new QTableWidgetItem(mostrar.value(1).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,1,new QTableWidgetItem(mostrar.value(2).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,2,new QTableWidgetItem(mostrar.value(3).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,3,new QTableWidgetItem(mostrar.value(4).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,4,new QTableWidgetItem(mostrar.value(5).toByteArray().constData()));
-        ui->tableWidgetdato->setItem(fila,5,new QTableWidgetItem(mostrar.value(6).toDate().toString("dd-MM-yyyy")));
-        fila++;
-    }
 }
 
 void MainWindow::mostrarDatos()
@@ -104,7 +74,6 @@ void MainWindow::mostrarDatos()
     }
     max = 0;
     QDate fecha;
-    ui->tableWidgetdato->setRowCount(0);
     while(mostrar.next()){
         int x = mostrar.value(3).toInt(&ok);
         int y = mostrar.value(2).toInt(&ok);
@@ -119,12 +88,12 @@ void MainWindow::mostrarDatos()
     }
 }
 
-void MainWindow::mostrarFechas()
+void MainWindow::mostrarFechas(const QString &name)
 {
     listaFechas.clear();
     QString consulta;
-    consulta.append("SELECT * FROM ");
-    consulta.append(nombre);
+    consulta.append("SELECT fecha FROM ");
+    consulta.append(name);
     QSqlQuery mostrar;
     mostrar.prepare(consulta);
     if(!mostrar.exec()){
@@ -132,7 +101,7 @@ void MainWindow::mostrarFechas()
     }
     QDate fecha;
     while(mostrar.next()){
-        fecha = mostrar.value(6).toDate();
+        fecha = mostrar.value(0).toDate();
         QString date = fecha.toString("dd-MM-yyyy");
         if(!listaFechas.contains(date))
             listaFechas.insert(0,date);
@@ -145,22 +114,22 @@ void MainWindow::initConfiguration()
     if(file->open(QIODevice::ReadOnly | QIODevice::Text)){
         QTextStream flujo(file);
         while(!flujo.atEnd()){
-            lastConfig.database = file->readLine();
-            lastConfig.database.chop(1);
-            lastConfig.jugador = file->readLine();
-            lastConfig.jugador.chop(1);
+//            lastConfig.database = file->readLine();
+//            lastConfig.database.chop(1);
+//            lastConfig.jugador = file->readLine();
+//            lastConfig.jugador.chop(1);
             lastConfig.cancha = file->readLine();
             lastConfig.cancha.chop(1);
             lastConfig.puerto = file->readLine();
             lastConfig.puerto.chop(1);
         }
-        path = lastConfig.database;
-        ejecutarNuevo();
-        on_comboBoxtablas_activated(lastConfig.jugador);
-        ui->comboBoxtablas->setCurrentText(lastConfig.jugador);
+//        path = lastConfig.database;
+//        ejecutarNuevo();
+//        on_comboBoxtablas_activated(lastConfig.jugador);
+//        ui->comboBoxtablas->setCurrentText(lastConfig.jugador);
         readFile(lastConfig.cancha);
         ui->labelCanchaSelected->setText(esquinas.nombreCancha);
-        Serial_Conf(lastConfig.puerto);
+//        Serial_Conf(lastConfig.puerto);
         file->close();
     }
 }
@@ -170,8 +139,8 @@ void MainWindow::lastConfiguration()
     file = new QFile("inicializador.txt");
     file->open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream flujo(file);
-    flujo << path << "\n";
-    flujo << lastConfig.jugador << "\n";
+//    flujo << path << "\n";
+//    flujo << lastConfig.jugador << "\n";
     flujo << lastConfig.cancha << "\n";
     flujo << lastConfig.puerto << "\n";
     file->close();
@@ -302,6 +271,7 @@ void MainWindow::Serial_Pedir()
             minPulso[n] = data.pulsacion;
         if(data.pulsacion > maxPulso[n])
             maxPulso[n] = data.pulsacion;
+        actualPulso[n] = data.pulsacion;
         nombre = nombreCamiseta(n);
         db->addData(nombre,data);
 //        dialogoHR->setHrPlayer(data.validez, data.velocidad);
@@ -402,63 +372,6 @@ double MainWindow::Mapeo_y(double x, double y)
     return yprima;
 }
 
-void MainWindow::on_pushButtonmanual_clicked()
-{
-    QString punto_nuevo = ui->lineEditpunto->text();
-    punto_nuevo.remove(QChar(','),Qt::CaseInsensitive);
-    int x5 = punto_nuevo.right(8).toInt(&ok);
-    punto_nuevo.chop(10);
-    int y5 = punto_nuevo.right(8).toInt(&ok);
-    m5 = Mapeo_x(x5,y5);
-    n5 = Mapeo_y(x5,y5);
-    DbManager::DataBlock currentData;
-    currentData.validez = "C";
-    currentData.latitud = y5;
-    currentData.longitud = x5;
-    currentData.velocidad = 125;
-    currentData.pulsacion = 75;
-    db->addData(nombre,currentData);
-}
-
-void MainWindow::on_pushButtonrandom_clicked()
-{
-    int aleatorioy = (qrand() % 622) + 747308;
-    int aleatoriox = (qrand() % 1098) + 514665;
-    QString punto;
-    punto.append("-31,");
-    punto.append(QString::number(aleatorioy));
-    punto.append(", -60,");
-    punto.append(QString::number(aleatoriox));
-    ui->lineEditpunto->setText(punto);
-}
-
-void MainWindow::on_action_Open_triggered()
-{
-    path.clear();
-    path = QFileDialog::getSaveFileName(
-                this,
-                "GPSport - Abrir o crear equipo",
-                "/Users/javos/Desktop/",
-                "Databases (*.sqlite);;All Files (*.*)");
-    if(!path.isNull())
-        ejecutarNuevo();
-}
-
-void MainWindow::ejecutarNuevo()
-{
-    db = new DbManager(path);
-    if(db->isOpen()){
-        QString titulo;
-        titulo.append("GPSport - ");
-        titulo.append(path);
-        this->setWindowTitle(titulo);
-        ui->comboBoxtablas->setEnabled(true);
-        ui->actionNew->setEnabled(true);
-        ui->actionJugador->setEnabled(true);
-        actualizarLista();
-    }
-}
-
 void MainWindow::on_actionNew_triggered()
 {
     connect(dialogoNew,SIGNAL(senal()),this,SLOT(ejecutarNuevoJugador()));
@@ -466,6 +379,11 @@ void MainWindow::on_actionNew_triggered()
     dialogoNew->adjustSize();
     dialogoNew->setWindowTitle("Nuevo Jugador");
     dialogoNew->show();
+}
+
+void MainWindow::setNombre(const QString &name)
+{
+    nombre = name;
 }
 
 void MainWindow::ejecutarNuevoJugador()
@@ -492,9 +410,7 @@ void MainWindow::ejecutarNuevoJugador()
 
 void MainWindow::actualizarLista()
 {
-    ui->comboBoxtablas->clear();
     listaJugadores = db->obtenerLista();
-    ui->comboBoxtablas->insertItem(0,"Seleccione un jugador");
     foreach (const QString &str, listaJugadores){
         if((str != "perfiles")&&(str != "sqlite_sequence")){
             QString name = str;
@@ -502,20 +418,7 @@ void MainWindow::actualizarLista()
                 int u = name.indexOf("_");
                 name.replace(u,1," ");
             }
-            ui->comboBoxtablas->insertItem(1,name);
         }
-    }
-}
-
-void MainWindow::on_comboBoxtablas_activated(const QString &arg1)
-{
-    nombre = arg1;
-    nombre = quitarEspacio(nombre);
-    if(db->buscarPerfil(nombre)){
-
-    }
-    else{
-
     }
 }
 
@@ -535,17 +438,15 @@ void MainWindow::agregarCancha()
 
 void MainWindow::on_actionMostrar_Analisis_triggered()
 {
-    mostrarFechas();
+    mostrarFechas(nombre);
     dialogoGps->setListaFechas(listaFechas);
     coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
-    mostrarDatos();
-    filtroMatricial();
     dialogoGps->setModal(true);
-    dialogoGps->plot(vector3,110);
     dialogoGps->show();
     for(int indice=0;indice<col;indice++)
         for(int jndice=0;jndice<fil;jndice++)
             vector3[indice][jndice] = 0;
+    dialogoGps->plot(vector3,col);
     connect(dialogoGps,SIGNAL(senal()),this,SLOT(buscarFecha()));
 }
 
@@ -557,6 +458,11 @@ QString MainWindow::obtenerPulsacionMaxima(int numero)
 QString MainWindow::obtenerPulsacionMinima(int numero)
 {
     return QString::number(minPulso[numero]);
+}
+
+QString MainWindow::obtenerPulsacionActual(int numero)
+{
+    return QString::number(actualPulso[numero]);
 }
 
 void MainWindow::on_action_Seleccionar_Cancha_triggered()
@@ -613,49 +519,40 @@ bool MainWindow::on_actionSerialConect_triggered()
     return estado_serial;
 }
 
-void MainWindow::buscarFecha()
+void MainWindow::buscarFecha()//const QString &name)   //quitar qstring de parametro
 {
     coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
     QDate fechaBuscada = dialogoGps->obtenerFecha();
-    if(listaFechas.contains(fechaBuscada.toString("dd-MM-yyyy")))
-    {
-        for(int indice=0;indice<col;indice++)
-            for(int jndice=0;jndice<fil;jndice++){
-                vector2[indice][jndice] = 0;
-                vector3[indice][jndice] = 0;
-            }
-        max = 0;
-        QString consulta;
-        consulta.append("SELECT latitud,longitud,velocidad,pulsacion,fecha FROM ");
-        consulta.append(nombre);
-        consulta.append(" WHERE fecha = (:fecha)");
-        QSqlQuery mostrar;
-        mostrar.prepare(consulta);
-        mostrar.bindValue(":fecha", fechaBuscada);
-        if(!mostrar.exec()){
-            qDebug() << "ERROR! " << mostrar.lastError();
+    for(int indice=0;indice<col;indice++)
+        for(int jndice=0;jndice<fil;jndice++){
+            vector2[indice][jndice] = 0;
+            vector3[indice][jndice] = 0;
         }
-        while(mostrar.next()){
-            int x = mostrar.value(1).toInt(&ok);
-            int y = mostrar.value(0).toInt(&ok);
-            int m = Mapeo_x(x,y);
-            int n = Mapeo_y(x,y);
-            int j = m / div;
-            int k = n / div;
-//            vector[m][n] = vector[m][n] + 1;
-            vector2[j][k] = vector2[j][k] + 1;
-            if((vector2[j][k] > max))
-                max = vector2[j][k];
-        }
-        filtroMatricial();
-        dialogoGps->plot(vector3,fil);
+    max = 0;
+    QString consulta;
+    consulta.append("SELECT latitud,longitud,velocidad,pulsacion,fecha FROM ");
+    consulta.append(nombre);
+    consulta.append(" WHERE fecha = (:fecha)");
+    QSqlQuery mostrar;
+    mostrar.prepare(consulta);
+    mostrar.bindValue(":fecha", fechaBuscada.toString("yyyy-MM-dd"));
+    if(!mostrar.exec()){
+        qDebug() << "ERROR! " << mostrar.lastError();
     }
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    mostrarTabla();
-    mostrarFechas();
+    while(mostrar.next()){
+        int x = mostrar.value(1).toInt(&ok);
+        int y = mostrar.value(0).toInt(&ok);
+        int m = Mapeo_x(x,y);
+        int n = Mapeo_y(x,y);
+        int j = m / div;
+        int k = n / div;
+//            vector[m][n] = vector[m][n] + 1;
+        vector2[j][k] = vector2[j][k] + 1;
+        if((vector2[j][k] > max))
+            max = vector2[j][k];
+    }
+    filtroMatricial();
+    dialogoGps->plot(vector3,col);
 }
 
 //----------------------
@@ -749,11 +646,6 @@ QDate MainWindow::formatoFecha(QString fecha)
     return natalicio;
 }
 
-void MainWindow::pulsacionMaxMin(const QString &name)
-{
-
-}
-
 int MainWindow::serialCamiseta(const QString &player)
 {
     int camiseta;
@@ -830,6 +722,7 @@ void MainWindow::calculoPrevioMaxMin()
     QString name, consulta;
     for(int i = 0; i<11; i++){
         name = nombreCamiseta(i);
+        consulta.clear();
         consulta.append("SELECT pulsacion FROM ");
         consulta.append(name);
         QSqlQuery mostrar;

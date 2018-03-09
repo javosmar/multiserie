@@ -43,29 +43,26 @@ public:
         QString corner4;
     };
     struct Config{
-        QString database;
-        QString jugador;
         QString cancha;
         QString puerto;
     };
     //------------
-    void mostrarTabla();
     void mostrarDatos();
-    void mostrarFechas();
+    void mostrarFechas(const QString &name);
     //-----------
     Q_INVOKABLE bool nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso);
     Q_INVOKABLE QString cargarPhoto_clicked();
     Q_INVOKABLE bool buscarJugador(const QString &buscado);
     Q_INVOKABLE QStringList obtenerJugador();
     Q_INVOKABLE QStringList obtenerListaJugadores();
-    Q_INVOKABLE void on_comboBoxtablas_activated(const QString &arg1);
     Q_INVOKABLE bool on_actionSerialConect_triggered();
     Q_INVOKABLE void on_actionNew_triggered();
+    Q_INVOKABLE void setNombre(const QString &name);
     Q_INVOKABLE void on_actionMostrar_Analisis_triggered();
     Q_INVOKABLE QString obtenerPulsacionMaxima(int numero);
     Q_INVOKABLE QString obtenerPulsacionMinima(int numero);
+    Q_INVOKABLE QString obtenerPulsacionActual(int numero);
     Q_INVOKABLE void calculoPrevioMaxMin();
-
 
 signals:
     void serialConected();
@@ -87,15 +84,10 @@ private slots:
     void coordenadas(QString, QString, QString, QString);
     double Mapeo_x(double, double);
     double Mapeo_y(double, double);
-    void on_pushButtonmanual_clicked();
-    void on_pushButtonrandom_clicked();
-    void on_action_Open_triggered();
-    void ejecutarNuevo();
     void ejecutarNuevoJugador();
     void actualizarLista();
     void on_actionAdd_Court_triggered();
     void agregarCancha();
-//    void on_actionMostrar_Analisis_triggered();
     void on_action_Seleccionar_Cancha_triggered();
     void seleccionCancha();
     void on_action_Configurar_Conexi_n_triggered();
@@ -103,13 +95,10 @@ private slots:
     void on_actionClose_triggered();
     void buscarFecha();
 
-    void on_pushButton_clicked();
-
     void openDatabase();
     QString quitarEspacio(QString nombre);
     QString agregarEspacio(QString nombre);
     QDate formatoFecha(QString fecha);
-    void pulsacionMaxMin(const QString &name);
     int serialCamiseta(const QString &player);
     QString nombreCamiseta(int camiseta);
 
@@ -134,7 +123,7 @@ private:
     int ancho,alto;
     Config lastConfig;
     DbManager::PerfilBlock perfilBuscado, perfilNuevo;
-    int maxPulso[11], minPulso[11];
+    int maxPulso[11], minPulso[11], actualPulso[11];
 };
 
 #endif // MAINWINDOW_H

@@ -155,7 +155,7 @@ Item {
                         x: 7
                         y: 5
                         id: textNombre
-                        font.pointSize: 15
+                        font.pointSize: 20
                         color: 'white'
                         text: Jugador
                     }
@@ -208,8 +208,8 @@ Item {
                         anchors.fill: myParent
 
                         onClicked: {
+                            mainWidget.setNombre(Jugador);
                             mainWidget.on_actionMostrar_Analisis_triggered();
-//                            mainWidget.on_comboBoxtablas_activated(Jugador);
                         }
                     }
 
@@ -217,6 +217,7 @@ Item {
                         id: columnaEstadistica
                         anchors {
                             right: myParent.right
+                            verticalCenter: pic.verticalCenter
                             rightMargin: (myParent.width - pic.width - columnaEstadistica.width) / 2
                             top: pic.top
                             topMargin: 10
@@ -235,7 +236,7 @@ Item {
                             id: textMaxPulsometro
                             font.pointSize: 15
                             color: 'white'
-                            text: Max + " - " + Min
+                            text: Min + " - " + Max
                         }
                     }
 
@@ -268,7 +269,7 @@ Item {
                         }
 
                         Timer {
-                            interval: 3000
+                            interval: 2000
                             running: buttonConectar.estadoConexion
                             repeat: true
 
@@ -276,11 +277,13 @@ Item {
                                 var listaJugadores = mainWidget.obtenerListaJugadores();
                                 var maxPulso
                                 var minPulso
+                                var actualPulso
                                 for(var ix=0;ix<listaJugadores.length;ix++){
                                     var Jugador = listaJugadores[ix];
                                     maxPulso = mainWidget.obtenerPulsacionMaxima(ix);
                                     minPulso = mainWidget.obtenerPulsacionMinima(ix);
-                                    grilla.model.get(ix).Pulso = "---"
+                                    actualPulso = mainWidget.obtenerPulsacionActual(ix);
+                                    grilla.model.get(ix).Pulso = actualPulso
                                     grilla.model.get(ix).Max = maxPulso
                                     grilla.model.get(ix).Min = minPulso
                                 }
@@ -317,8 +320,6 @@ Item {
                 checked: estadoConexion
                 onClicked: {
                     mainWidget.on_actionSerialConect_triggered();
-//                    grilla.model.setProperty(3, Jugador, "peso con timer")
-//                    grilla.model.get(2).Jugador = "hola mundo"
                 }
 
                 property bool estadoConexion: false

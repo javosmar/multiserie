@@ -1,9 +1,6 @@
 #include "dialog_gps.h"
 #include "ui_dialog_gps.h"
 
-#define col 110
-#define fil 64
-
 Dialog_Gps::Dialog_Gps(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog_Gps)
@@ -31,15 +28,14 @@ void Dialog_Gps::on_pushButtonCerrar_clicked()
     this->close();
 }
 
-void Dialog_Gps::plot(float vector[][64], int filas)
+void Dialog_Gps::plot(float vector[][fil], int filas)
 {
 //    ui->plot->graph(0)->data().clear();
     ui->plot->clearGraphs();
-//    ui->plot->replot();
     ui->plot->axisRect()->setupFullAxesBox(true);
     QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
     int nx = filas;
-    int ny = 64;
+    int ny = fil;
     double x, y, z;
     colorMap->data()->setSize(nx, ny);
     colorMap->data()->setRange(QCPRange(0, nx), QCPRange(0, ny));
@@ -52,7 +48,6 @@ void Dialog_Gps::plot(float vector[][64], int filas)
             max = z;
       }
     }
-    qDebug() << max;
     colorMap->setColorScale(colorScale);
     colorScale->axis()->setRange(QCPRange(0,max));
     colorScale->axis()->setVisible(false);

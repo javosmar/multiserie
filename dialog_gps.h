@@ -4,6 +4,10 @@
 #include <QDialog>
 #include <qcustomplot.h>
 
+#define col 110
+#define fil 64
+#define div 5
+
 namespace Ui {
 class Dialog_Gps;
 }
@@ -16,7 +20,7 @@ public:
     explicit Dialog_Gps(QWidget *parent = 0);
     ~Dialog_Gps();
 
-    void plot(float vector[][64],int);
+    void plot(float vector[][fil],int);
     void setListaFechas(QStringList);
     QDate obtenerFecha();
 

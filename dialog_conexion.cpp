@@ -34,5 +34,5 @@ void Dialog_Conexion::actualizar()
 {
     ui->comboBoxPuerto->clear();
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-        ui->comboBoxPuerto->insertItem(0,info.portName());
+        ui->comboBoxPuerto->insertItem(1,info.portName());
 }
