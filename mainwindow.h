@@ -15,7 +15,6 @@
 #include <QFile>
 #include <dbmanager.h>
 #include <dialog_nuevo.h>
-#include <dialog_hrate.h>
 #include <dialognewcourt.h>
 #include <dialog_selectcourt.h>
 #include <dialog_conexion.h>
@@ -108,7 +107,6 @@ private:
     DuThread *mThread;
     QVector<double> qv_x, qv_y;
     Dialog_nuevo *dialogoNew;
-    Dialog_HRate *dialogoHR;
     DialogNewCourt *dialogoNewCancha;
     Dialog_SelectCourt *dialogoSelectCourt;
     Dialog_Conexion *dialogoConexion;

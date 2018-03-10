@@ -151,6 +151,7 @@ Item {
                     height: grilla.cellHeight - 10
                     color: '#5FF300F0'
 
+
                     Text {
                         x: 7
                         y: 5
@@ -206,6 +207,7 @@ Item {
 
                     MouseArea {
                         anchors.fill: myParent
+                        enabled: !buttonConectar.estadoConexion
 
                         onClicked: {
                             mainWidget.setNombre(Jugador);
@@ -218,7 +220,7 @@ Item {
                         anchors {
                             right: myParent.right
                             verticalCenter: pic.verticalCenter
-                            rightMargin: (myParent.width - pic.width - columnaEstadistica.width) / 2
+                            rightMargin: (myParent.width - pic.width - columnaEstadistica.width - 5) / 2
                             top: pic.top
                             topMargin: 10
                         }
@@ -226,6 +228,7 @@ Item {
 
                         Text {
                             id: textPulso
+                            anchors.horizontalCenter: columnaEstadistica.horizontalCenter
                             font.pointSize: 30
                             font.bold: true
                             color: 'white'
@@ -234,6 +237,7 @@ Item {
 
                         Text {
                             id: textMaxPulsometro
+                            anchors.horizontalCenter: columnaEstadistica.horizontalCenter
                             font.pointSize: 15
                             color: 'white'
                             text: Min + " - " + Max
@@ -244,9 +248,7 @@ Item {
                         id: heart
                         anchors.horizontalCenter: columnaEstadistica.horizontalCenter
                         anchors.top: columnaEstadistica.bottom
-                        anchors.topMargin: 30
-
-                        width: (myParent.width - pic.width) * 0.6
+                        width: ((myParent.width - pic.width) * 0.4)
                         height: width
                         source: "qrc:/Icons/heart.png"
                         smooth: true
@@ -265,6 +267,7 @@ Item {
                         Connections {
                             target: mainWidget
                             onValidador: {
+//                              codigo para detectar unidades online y offline
                             }
                         }
 
@@ -301,6 +304,7 @@ Item {
                 y: mainParent.height - buttonNuevoJugador.height - 5
                 text: 'Nuevo jugador'
                 font.pointSize: 15
+                enabled: !buttonConectar.estadoConexion
 
                 onClicked: {
 //                    mainWidget.on_actionNew_triggered();
@@ -323,17 +327,17 @@ Item {
                 }
 
                 property bool estadoConexion: false
-                property string textBoton: "Conectar"
+                property string textBoton: "Iniciar"
 
                 Connections {
                     target: mainWidget
                     onSerialConected: {
                         buttonConectar.estadoConexion = true
-                        buttonConectar.textBoton = "Desconectar"
+                        buttonConectar.textBoton = "Finalizar"
                     }
                     onSerialDesconected: {
                         buttonConectar.estadoConexion = false
-                        buttonConectar.textBoton = "Conectar"
+                        buttonConectar.textBoton = "Iniciar"
                     }
                 }
 
@@ -354,6 +358,7 @@ Item {
                 y: mainParent.height - buttonInicio.height - 5
                 text: 'Inicio'
                 font.pointSize: 15
+                enabled: !buttonConectar.estadoConexion
 
                 onClicked: {
                     stack.push(inicio);

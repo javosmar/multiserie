@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
     dialogoNew = new Dialog_nuevo;
-    dialogoHR = new Dialog_HRate;
     dialogoNewCancha = new DialogNewCourt();
     dialogoSelectCourt = new Dialog_SelectCourt;
     dialogoConexion = new Dialog_Conexion;
@@ -32,8 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //----Serial----
     serial = new QSerialPort(this);
     connect(serial,SIGNAL(readyRead()),this,SLOT(Serial_Pedir()));
-    connect(dialogoHR,SIGNAL(senal()),this,SLOT(Serial_Desconect()));
-    connect(dialogoHR,SIGNAL(finished(int)),this,SLOT(Serial_Desconect()));
     //--------------
     connect(ui->actionserialConfig,SIGNAL(triggered(bool)),this,SLOT(on_action_Configurar_Conexi_n_triggered()));
     connect(ui->actionCancha,SIGNAL(triggered(bool)),this,SLOT(on_action_Seleccionar_Cancha_triggered()));
@@ -114,19 +111,11 @@ void MainWindow::initConfiguration()
     if(file->open(QIODevice::ReadOnly | QIODevice::Text)){
         QTextStream flujo(file);
         while(!flujo.atEnd()){
-//            lastConfig.database = file->readLine();
-//            lastConfig.database.chop(1);
-//            lastConfig.jugador = file->readLine();
-//            lastConfig.jugador.chop(1);
             lastConfig.cancha = file->readLine();
             lastConfig.cancha.chop(1);
             lastConfig.puerto = file->readLine();
             lastConfig.puerto.chop(1);
         }
-//        path = lastConfig.database;
-//        ejecutarNuevo();
-//        on_comboBoxtablas_activated(lastConfig.jugador);
-//        ui->comboBoxtablas->setCurrentText(lastConfig.jugador);
         readFile(lastConfig.cancha);
         ui->labelCanchaSelected->setText(esquinas.nombreCancha);
 //        Serial_Conf(lastConfig.puerto);
@@ -139,8 +128,6 @@ void MainWindow::lastConfiguration()
     file = new QFile("inicializador.txt");
     file->open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream flujo(file);
-//    flujo << path << "\n";
-//    flujo << lastConfig.jugador << "\n";
     flujo << lastConfig.cancha << "\n";
     flujo << lastConfig.puerto << "\n";
     file->close();
@@ -213,10 +200,9 @@ void MainWindow::Serial_Conect()
         estado_serial = true;
         serial->write("A");
         mThread->start(QThread::LowestPriority);
-//        dialogoHR->show();
         for(int i=0;i<11;i++){
             maxPulso[i] = 0;
-            minPulso[i] = 150;
+            minPulso[i] = 220;
         }
         ui->actionSerialConect->setIcon(QPixmap("://Icons/png/010-player.png"));
         emit serialConected();
@@ -250,7 +236,7 @@ void MainWindow::Serial_Pedir()
 {
     int n;
     DbManager::DataBlock data;
-    if(serial->bytesAvailable() >= 25){
+    if(serial->bytesAvailable() >= 24){
         data.validez = serial->read(1);
         QString lat = serial->read(2);
         int lat_minutos = serial->read(6).toInt(&ok);// / 6;
@@ -262,9 +248,9 @@ void MainWindow::Serial_Pedir()
         lon.append(QString::number(lon_minutos));
         data.longitud = lon.toInt(&ok);
         serial->read(1);
-        data.velocidad = serial->read(4).toInt(&ok);
-        serial->read(1);                            //pulsacion
-        data.pulsacion = (qrand() % 90) + 60;
+        data.velocidad = serial->read(3).toInt(&ok);
+        data.pulsacion = serial->read(1).toHex().toInt(&ok,16);                            //pulsacion
+//        data.pulsacion = (qrand() % 90) + 60;
         data.fecha = QDate::currentDate();
         n = serialCamiseta(data.validez);
         if(data.pulsacion < minPulso[n])
@@ -274,7 +260,7 @@ void MainWindow::Serial_Pedir()
         actualPulso[n] = data.pulsacion;
         nombre = nombreCamiseta(n);
         db->addData(nombre,data);
-//        dialogoHR->setHrPlayer(data.validez, data.velocidad);
+        qDebug() << data.pulsacion << " : " << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion;
     }
 }
 
@@ -452,17 +438,32 @@ void MainWindow::on_actionMostrar_Analisis_triggered()
 
 QString MainWindow::obtenerPulsacionMaxima(int numero)
 {
-    return QString::number(maxPulso[numero]);
+    int pulso = maxPulso[numero];
+    if((pulso < 40)||(pulso > 200)){
+        pulso = 0;
+        return "max";
+    }
+    return QString::number(pulso);
 }
 
 QString MainWindow::obtenerPulsacionMinima(int numero)
 {
-    return QString::number(minPulso[numero]);
+    int pulso = minPulso[numero];
+    if((pulso < 40)||(pulso > 200)){
+        pulso = 0;
+        return "min";
+    }
+    return QString::number(pulso);
 }
 
 QString MainWindow::obtenerPulsacionActual(int numero)
 {
-    return QString::number(actualPulso[numero]);
+    int pulso = actualPulso[numero];
+    if((pulso < 40)||(pulso > 200)){
+        pulso = 0;
+        return "AVG";
+    }
+    return QString::number(pulso);
 }
 
 void MainWindow::on_action_Seleccionar_Cancha_triggered()
@@ -649,27 +650,27 @@ QDate MainWindow::formatoFecha(QString fecha)
 int MainWindow::serialCamiseta(const QString &player)
 {
     int camiseta;
-    if(player == "A")
+    if(player == "a")
         camiseta = 0;
-    else if(player == "B")
+    else if(player == "b")
         camiseta = 1;
-    else if(player == "C")
+    else if(player == "c")
         camiseta = 2;
-    else if(player == "D")
+    else if(player == "d")
         camiseta = 3;
-    else if(player == "E")
+    else if(player == "e")
         camiseta = 4;
-    else if(player == "F")
+    else if(player == "f")
         camiseta = 5;
-    else if(player == "G")
+    else if(player == "g")
         camiseta = 6;
-    else if(player == "H")
+    else if(player == "h")
         camiseta = 7;
-    else if(player == "I")
+    else if(player == "i")
         camiseta = 8;
-    else if(player == "J")
+    else if(player == "j")
         camiseta = 9;
-    else if(player == "K")
+    else if(player == "k")
         camiseta = 10;
     return camiseta;
 }
