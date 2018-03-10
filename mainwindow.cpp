@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->quickWidget->rootContext()->setContextProperty("mainWidget",this);
     ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/widgetPulsacion.qml")));
 
-//    this->showMaximized();
+    this->showMaximized();
     openDatabase();
 
     initConfiguration();

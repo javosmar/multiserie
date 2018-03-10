@@ -89,19 +89,19 @@ Item {
                 }
             }
 
-            Button {
-                id: buttonGuardar
-                width: anchoBoton
-                height: altoBoton
-                x: 5
-                y: mainParent.height - buttonGuardar.height - 5
-                text: 'Guardar'
-                font.pointSize: 15
+//            Button {
+//                id: buttonSalir
+//                width: anchoBoton
+//                height: altoBoton
+//                x: 5
+//                y: mainParent.height - buttonSalir.height - 5
+//                text: 'Salir'
+//                font.pointSize: 15
 
-                onClicked: {
-
-                }
-            }
+//                onClicked: {
+//                    Qt.quit()
+//                }
+//            }
         }
     }
 
@@ -113,6 +113,7 @@ Item {
             Component.onCompleted: {
                 grilla.model.clear();
                 var listaJugadores = mainWidget.obtenerListaJugadores();
+                if(listaJugadores.length !== 0){
                 mainWidget.calculoPrevioMaxMin();
                 var maxPulso
                 var minPulso
@@ -133,6 +134,7 @@ Item {
                                                 Max: maxPulso,
                                                 Min: minPulso});
                     }
+                }
                 }
             }
 
