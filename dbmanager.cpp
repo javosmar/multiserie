@@ -45,6 +45,7 @@ bool DbManager::createTable(QString tabla)
                     "longitud INTEGER NOT NULL,"
                     "velocidad INTEGER NOT NULL,"
                     "pulsacion INTEGER NOT NULL,"
+                    "hora BLOB,"
                     "fecha BLOB);");
     query.prepare(consulta);
     if (!query.exec())
@@ -81,8 +82,8 @@ bool DbManager::addData(QString tabla, DataBlock data)
         QString pedido;
         pedido.append("INSERT INTO ");
         pedido.append(tabla);
-        pedido.append(" (validez,latitud,longitud,velocidad,pulsacion,fecha) "
-                      "VALUES (:validez,:latitud,:longitud,:velocidad,:pulsacion,:fecha)");
+        pedido.append(" (validez,latitud,longitud,velocidad,pulsacion,hora,fecha) "
+                      "VALUES (:validez,:latitud,:longitud,:velocidad,:pulsacion,:hora,:fecha)");
         QSqlQuery queryAdd;
         queryAdd.prepare(pedido);
         queryAdd.bindValue(":validez", data.validez);
@@ -90,6 +91,7 @@ bool DbManager::addData(QString tabla, DataBlock data)
         queryAdd.bindValue(":longitud", data.longitud);
         queryAdd.bindValue(":velocidad", data.velocidad);
         queryAdd.bindValue(":pulsacion", data.pulsacion);
+        queryAdd.bindValue(":hora", data.hora);
         queryAdd.bindValue(":fecha", data.fecha);
         if(queryAdd.exec())
         {

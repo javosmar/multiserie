@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("GPSport");
     mThread = new DuThread(10,this);
-    dialogoNew = new Dialog_nuevo;
     dialogoNewCancha = new DialogNewCourt();
     dialogoSelectCourt = new Dialog_SelectCourt;
     dialogoConexion = new Dialog_Conexion;
@@ -34,8 +33,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //--------------
     connect(ui->actionserialConfig,SIGNAL(triggered(bool)),this,SLOT(on_action_Configurar_Conexi_n_triggered()));
     connect(ui->actionCancha,SIGNAL(triggered(bool)),this,SLOT(on_action_Seleccionar_Cancha_triggered()));
-    connect(ui->actionAnalisis,SIGNAL(triggered(bool)),this,SLOT(on_actionMostrar_Analisis_triggered()));
+    connect(dialogoGps,SIGNAL(senal()),this,SLOT(buscarFecha()));
     connect(ui->actionJugador,SIGNAL(triggered(bool)),this,SLOT(on_actionNew_triggered()));
+    connect(dialogoConexion,SIGNAL(senal()),this,SLOT(setCom()));
     //-----QML------
     ui->quickWidget->rootContext()->setContextProperty("mainWidget",this);
     ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/widgetPulsacion.qml")));
@@ -117,7 +117,6 @@ void MainWindow::initConfiguration()
             lastConfig.puerto.chop(1);
         }
         readFile(lastConfig.cancha);
-        ui->labelCanchaSelected->setText(esquinas.nombreCancha);
 //        Serial_Conf(lastConfig.puerto);
         file->close();
     }
@@ -171,6 +170,10 @@ void MainWindow::readFile(QString palabra)
             buscado.chop(23);
             esquinas.nombreCancha = buscado;
             encontrado = true;
+            QString titulo;
+            titulo.append("GPSport - ");
+            titulo.append(esquinas.nombreCancha);
+            this->setWindowTitle(titulo);
         }
         else
             posicion++;
@@ -238,29 +241,33 @@ void MainWindow::Serial_Pedir()
     DbManager::DataBlock data;
     if(serial->bytesAvailable() >= 24){
         data.validez = serial->read(1);
-        QString lat = serial->read(2);
-        int lat_minutos = serial->read(6).toInt(&ok);// / 6;
-        lat.append(QString::number(lat_minutos));
-        data.latitud = lat.toInt(&ok);
-        serial->read(2);
-        QString lon = serial->read(2);
-        int lon_minutos = serial->read(6).toInt(&ok);// / 6;
-        lon.append(QString::number(lon_minutos));
-        data.longitud = lon.toInt(&ok);
-        serial->read(1);
-        data.velocidad = serial->read(3).toInt(&ok);
-        data.pulsacion = serial->read(1).toHex().toInt(&ok,16);                            //pulsacion
-//        data.pulsacion = (qrand() % 90) + 60;
-        data.fecha = QDate::currentDate();
-        n = serialCamiseta(data.validez);
-        if(data.pulsacion < minPulso[n])
-            minPulso[n] = data.pulsacion;
-        if(data.pulsacion > maxPulso[n])
-            maxPulso[n] = data.pulsacion;
-        actualPulso[n] = data.pulsacion;
-        nombre = nombreCamiseta(n);
-        db->addData(nombre,data);
-        qDebug() << data.pulsacion << " : " << data.validez << data.latitud << data.longitud << data.velocidad << data.pulsacion;
+        if(data.validez != "q"){
+            QString lat = serial->read(2);
+            int lat_minutos = serial->read(6).toInt(&ok) / 0.6;
+            lat.append(QString::number(lat_minutos));
+            data.latitud = lat.toInt(&ok);
+            serial->read(2);
+            QString lon = serial->read(2);
+            int lon_minutos = serial->read(6).toInt(&ok) / 0.6;
+            lon.append(QString::number(lon_minutos));
+            data.longitud = lon.toInt(&ok);
+            serial->read(1);
+            data.velocidad = serial->read(3).toInt(&ok);
+            data.pulsacion = serial->read(1).toHex().toInt(&ok,16);
+            data.hora = QTime::currentTime();
+            data.fecha = QDate::currentDate();
+            n = serialCamiseta(data.validez);
+            if(data.pulsacion < minPulso[n])
+                minPulso[n] = data.pulsacion;
+            if(data.pulsacion > maxPulso[n])
+                maxPulso[n] = data.pulsacion;
+            actualPulso[n] = data.pulsacion;
+            nombre = nombreCamiseta(n);
+            db->addData(nombre,data);
+        }
+        else
+            serial->read(23);
+        qDebug() << data.validez << data.pulsacion;
     }
 }
 
@@ -360,38 +367,12 @@ double MainWindow::Mapeo_y(double x, double y)
 
 void MainWindow::on_actionNew_triggered()
 {
-    connect(dialogoNew,SIGNAL(senal()),this,SLOT(ejecutarNuevoJugador()));
-    dialogoNew->setModal(true);
-    dialogoNew->adjustSize();
-    dialogoNew->setWindowTitle("Nuevo Jugador");
-    dialogoNew->show();
+    emit menuNuevoJugador();
 }
 
 void MainWindow::setNombre(const QString &name)
 {
     nombre = name;
-}
-
-void MainWindow::ejecutarNuevoJugador()
-{
-    disconnect(dialogoNew,0,this,0);
-    Dialog_nuevo::perfil p = dialogoNew->obtenerPerfil();
-    QString cadena;
-    cadena = p.nombre;
-    cadena = quitarEspacio(cadena);
-    if(db->createTable(cadena)){
-        ui->actionSerialConect->setEnabled(true);
-        actualizarLista();
-    }
-    if(db->createTablePerfiles()){
-        DbManager::PerfilBlock currentPerfil;
-        currentPerfil.nombre = cadena;
-        currentPerfil.photo = p.photo;
-        currentPerfil.fecha = p.fecha;
-        currentPerfil.peso = p.peso;
-        currentPerfil.altura = p.altura;
-        db->addPerfil(currentPerfil);
-    }
 }
 
 void MainWindow::actualizarLista()
@@ -422,7 +403,7 @@ void MainWindow::agregarCancha()
     writeFile(cancha);
 }
 
-void MainWindow::on_actionMostrar_Analisis_triggered()
+void MainWindow::MostrarAnalisis()
 {
     mostrarFechas(nombre);
     dialogoGps->setListaFechas(listaFechas);
@@ -430,10 +411,12 @@ void MainWindow::on_actionMostrar_Analisis_triggered()
     dialogoGps->setModal(true);
     dialogoGps->show();
     for(int indice=0;indice<col;indice++)
-        for(int jndice=0;jndice<fil;jndice++)
+        for(int jndice=0;jndice<fil;jndice++){
             vector3[indice][jndice] = 0;
+        }
+    dialogoGps->setNombre(nombre);
     dialogoGps->plot(vector3,col);
-    connect(dialogoGps,SIGNAL(senal()),this,SLOT(buscarFecha()));
+    dialogoGps->clearData();
 }
 
 QString MainWindow::obtenerPulsacionMaxima(int numero)
@@ -481,12 +464,13 @@ void MainWindow::seleccionCancha()
     court = dialogoSelectCourt->obtenerCancha();
     lastConfig.cancha = court;
     readFile(court);
-    ui->labelCanchaSelected->setText(esquinas.nombreCancha);
+    QString titulo = "GPSport - ";
+    titulo.append(esquinas.nombreCancha);
+    this->setWindowTitle(titulo);
 }
 
 void MainWindow::on_action_Configurar_Conexi_n_triggered()
 {
-    connect(dialogoConexion,SIGNAL(senal()),this,SLOT(setCom()));
     dialogoConexion->setModal(true);
     dialogoConexion->show();
 }
@@ -520,54 +504,80 @@ bool MainWindow::on_actionSerialConect_triggered()
     return estado_serial;
 }
 
-void MainWindow::buscarFecha()//const QString &name)   //quitar qstring de parametro
+void MainWindow::buscarFecha()
 {
-    coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
-    QDate fechaBuscada = dialogoGps->obtenerFecha();
+    dialogoGps->clearData();
     for(int indice=0;indice<col;indice++)
         for(int jndice=0;jndice<fil;jndice++){
-            vector2[indice][jndice] = 0;
             vector3[indice][jndice] = 0;
+            vector2[indice][jndice] = 0;
         }
-    max = 0;
-    QString consulta;
-    consulta.append("SELECT latitud,longitud,velocidad,pulsacion,fecha FROM ");
-    consulta.append(nombre);
-    consulta.append(" WHERE fecha = (:fecha)");
-    QSqlQuery mostrar;
-    mostrar.prepare(consulta);
-    mostrar.bindValue(":fecha", fechaBuscada.toString("yyyy-MM-dd"));
-    if(!mostrar.exec()){
-        qDebug() << "ERROR! " << mostrar.lastError();
-    }
-    while(mostrar.next()){
-        int x = mostrar.value(1).toInt(&ok);
-        int y = mostrar.value(0).toInt(&ok);
-        int m = Mapeo_x(x,y);
-        int n = Mapeo_y(x,y);
-        int j = m / div;
-        int k = n / div;
-//            vector[m][n] = vector[m][n] + 1;
-        vector2[j][k] = vector2[j][k] + 1;
-        if((vector2[j][k] > max))
-            max = vector2[j][k];
-    }
-    filtroMatricial();
     dialogoGps->plot(vector3,col);
+    int contador = 0;
+    int acumulador = 0;
+    maxVelocidad = 0;
+    pulsoMax = 0;
+    pulsoMin = 220;
+    coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
+    QDate fechaBuscada = dialogoGps->obtenerFecha();
+    if(listaFechas.contains(fechaBuscada.toString("dd-MM-yyyy"))){
+        max = 0;
+        QString consulta;
+        consulta.append("SELECT latitud,longitud,velocidad,pulsacion,hora,fecha FROM ");
+        consulta.append(nombre);
+        consulta.append(" WHERE fecha = (:fecha)");
+        QSqlQuery mostrar;
+        mostrar.prepare(consulta);
+        mostrar.bindValue(":fecha", fechaBuscada.toString("yyyy-MM-dd"));
+        if(!mostrar.exec()){
+            qDebug() << "ERROR! " << mostrar.lastError();
+        }
+        while(mostrar.next()){
+            dialogoGps->setTiempoPulso(mostrar.value(4).toTime(),mostrar.value(3).toInt(&ok));
+            if(mostrar.value(2).toInt(&ok) > maxVelocidad)
+                maxVelocidad = mostrar.value(2).toInt(&ok);
+            if(mostrar.value(3).toInt(&ok) > pulsoMax)
+                pulsoMax = mostrar.value(3).toInt(&ok);
+            if(mostrar.value(3).toInt(&ok) < pulsoMin)
+                pulsoMin = mostrar.value(3).toInt(&ok);
+            acumulador += mostrar.value(3).toInt(&ok);
+            contador++;
+            int x = mostrar.value(1).toInt(&ok);
+            int y = mostrar.value(0).toInt(&ok);
+            int m = Mapeo_x(x,y);
+            int n = Mapeo_y(x,y);
+            int j = m / div;
+            int k = n / div;
+            vector2[j][k] = vector2[j][k] + 1;
+            if((vector2[j][k] > max))
+                max = vector2[j][k];
+        }
+        pulsoProm = acumulador / contador;
+        if(maxVelocidad < 100)
+            maxVelocidad = 0;
+        maxVelocidad = maxVelocidad * 1.85 / 100;
+        dialogoGps->setDatos(maxVelocidad,pulsoMax,pulsoMin,pulsoProm);
+        filtroMatricial();
+        dialogoGps->plot(vector3,col);
+        dialogoGps->setGrafPulsos();
+    }
 }
 
 //----------------------
 
 bool MainWindow::nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso)
 {
-    QString nuevoNombre = quitarEspacio(nombre);
-    perfilNuevo.nombre = nuevoNombre;
-    perfilNuevo.fecha = formatoFecha(fecha);
-    perfilNuevo.altura = altura.toInt(&ok);
-    perfilNuevo.peso = peso.toInt(&ok);
-    bool flag1 = db->addPerfil(perfilNuevo);
-    bool flag2 = db->createTable(nuevoNombre);
-    bool flag = flag1&&flag2;
+    bool flag = false;
+    if(!nombre.isEmpty() && !fecha.isEmpty() && !altura.isEmpty() && !peso.isEmpty()){
+        QString nuevoNombre = quitarEspacio(nombre);
+        perfilNuevo.nombre = nuevoNombre;
+        perfilNuevo.fecha = formatoFecha(fecha);
+        perfilNuevo.altura = altura.toInt(&ok);
+        perfilNuevo.peso = peso.toInt(&ok);
+        bool flag1 = db->addPerfil(perfilNuevo);
+        bool flag2 = db->createTable(nuevoNombre);
+        flag = flag1&&flag2;
+    }
     return flag;
 }
 

@@ -23,13 +23,18 @@ public:
     void plot(float vector[][fil],int);
     void setListaFechas(QStringList);
     QDate obtenerFecha();
+    void setGrafPulsos();
+    void setTiempoPulso(QTime time, int pulse);
+    void clearData();
+    void initGrafPulsos();
+    void setNombre(const QString &name);
+    void setDatos(const float &maxVel,const int &maxPul,const int &minPul,const int &promPul);
 
 signals:
     void senal();
 
 private slots:
     void on_pushButtonCerrar_clicked();
-
     void on_comboBoxFecha_activated(const QString &arg1);
 
 private:
@@ -37,6 +42,9 @@ private:
     QCPColorScale *colorScale;
     double max = 0;
     QDate selectedFecha;
+    int i;
+    QVector<QTime> tiempo;
+    QVector<double> pulsos;
 };
 
 #endif // DIALOG_GPS_H

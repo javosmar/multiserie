@@ -33,7 +33,7 @@ void Dialog_SelectCourt::actualizarCanchas()
         counter++;
     }
     foreach (const QString &str, listaCanchas)
-        ui->comboBoxcancha->insertItem(0,str);
+        ui->comboBoxcancha->insertItem(1,str);
     listaCanchas.clear();
     file->close();
 }

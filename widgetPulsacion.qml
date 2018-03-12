@@ -27,6 +27,13 @@ Item {
         initialItem: inicio
     }
 
+    Connections {
+        target: mainWidget
+        onMenuNuevoJugador: {
+            stack.push(crearJugador)
+        }
+    }
+
     Component {
         id: inicio
 
@@ -88,20 +95,6 @@ Item {
                     stack.push(pulsacion);
                 }
             }
-
-//            Button {
-//                id: buttonSalir
-//                width: anchoBoton
-//                height: altoBoton
-//                x: 5
-//                y: mainParent.height - buttonSalir.height - 5
-//                text: 'Salir'
-//                font.pointSize: 15
-
-//                onClicked: {
-//                    Qt.quit()
-//                }
-//            }
         }
     }
 
@@ -114,7 +107,7 @@ Item {
                 grilla.model.clear();
                 var listaJugadores = mainWidget.obtenerListaJugadores();
                 if(listaJugadores.length !== 0){
-                mainWidget.calculoPrevioMaxMin();
+//                mainWidget.calculoPrevioMaxMin();
                 var maxPulso
                 var minPulso
                 for(var ix=0;ix<listaJugadores.length;ix++){
@@ -213,7 +206,7 @@ Item {
 
                         onClicked: {
                             mainWidget.setNombre(Jugador);
-                            mainWidget.on_actionMostrar_Analisis_triggered();
+                            mainWidget.MostrarAnalisis();
                         }
                     }
 
@@ -309,7 +302,6 @@ Item {
                 enabled: !buttonConectar.estadoConexion
 
                 onClicked: {
-//                    mainWidget.on_actionNew_triggered();
                     stack.push(crearJugador);
                 }
             }
@@ -504,7 +496,7 @@ Item {
                 font.pointSize: 15
 
                 onClicked: {
-                    stack.pop();
+                    stack.push(pulsacion);
                 }
             }
         }

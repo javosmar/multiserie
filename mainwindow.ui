@@ -32,74 +32,6 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="minimumSize">
-         <size>
-          <width>104</width>
-          <height>19</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Cancha seleccionada:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="labelCanchaSelected">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
      <widget class="QQuickWidget" name="quickWidget">
       <property name="minimumSize">
        <size>
@@ -144,7 +76,6 @@
     <property name="title">
      <string>&amp;GPS</string>
     </property>
-    <addaction name="actionMostrar_Analisis"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -185,7 +116,6 @@
    <addaction name="actionserialConfig"/>
    <addaction name="actionSerialConect"/>
    <addaction name="separator"/>
-   <addaction name="actionAnalisis"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
@@ -201,11 +131,6 @@
   <action name="actionAdd_Court">
    <property name="text">
     <string>&amp;Nueva Cancha</string>
-   </property>
-  </action>
-  <action name="actionMostrar_Analisis">
-   <property name="text">
-    <string>&amp;Análisis gráfico</string>
    </property>
   </action>
   <action name="action_Seleccionar_Cancha">
@@ -254,21 +179,15 @@
     <string>Jugador</string>
    </property>
   </action>
-  <action name="actionAnalisis">
-   <property name="icon">
-    <iconset resource="recurso.qrc">
-     <normaloff>:/Icons/png/004-paper.png</normaloff>:/Icons/png/004-paper.png</iconset>
-   </property>
-   <property name="text">
-    <string>Análisis</string>
-   </property>
-  </action>
   <action name="actionCancha">
    <property name="icon">
     <iconset resource="recurso.qrc">
      <normaloff>:/Icons/png/001-placeholder.png</normaloff>:/Icons/png/001-placeholder.png</iconset>
    </property>
    <property name="text">
+    <string>Seleccionar cancha</string>
+   </property>
+   <property name="iconText">
     <string>Cancha</string>
    </property>
   </action>

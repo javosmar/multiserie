@@ -14,7 +14,6 @@
 #include <QColormap>
 #include <QFile>
 #include <dbmanager.h>
-#include <dialog_nuevo.h>
 #include <dialognewcourt.h>
 #include <dialog_selectcourt.h>
 #include <dialog_conexion.h>
@@ -45,6 +44,13 @@ public:
         QString cancha;
         QString puerto;
     };
+    struct perfil{
+            QString nombre;
+            QByteArray photo;
+            int peso;
+            int altura;
+            QDate fecha;
+    };
     //------------
     void mostrarDatos();
     void mostrarFechas(const QString &name);
@@ -57,7 +63,7 @@ public:
     Q_INVOKABLE bool on_actionSerialConect_triggered();
     Q_INVOKABLE void on_actionNew_triggered();
     Q_INVOKABLE void setNombre(const QString &name);
-    Q_INVOKABLE void on_actionMostrar_Analisis_triggered();
+    Q_INVOKABLE void MostrarAnalisis();
     Q_INVOKABLE QString obtenerPulsacionMaxima(int numero);
     Q_INVOKABLE QString obtenerPulsacionMinima(int numero);
     Q_INVOKABLE QString obtenerPulsacionActual(int numero);
@@ -67,6 +73,7 @@ signals:
     void serialConected();
     void serialDesconected();
     void validador(const QString validez);
+    void menuNuevoJugador();
 
 private slots:
     void initConfiguration();
@@ -83,7 +90,6 @@ private slots:
     void coordenadas(QString, QString, QString, QString);
     double Mapeo_x(double, double);
     double Mapeo_y(double, double);
-    void ejecutarNuevoJugador();
     void actualizarLista();
     void on_actionAdd_Court_triggered();
     void agregarCancha();
@@ -106,22 +112,20 @@ private:
     QSerialPort *serial;
     DuThread *mThread;
     QVector<double> qv_x, qv_y;
-    Dialog_nuevo *dialogoNew;
     DialogNewCourt *dialogoNewCancha;
     Dialog_SelectCourt *dialogoSelectCourt;
     Dialog_Conexion *dialogoConexion;
     Dialog_Gps *dialogoGps;
     DbManager *db;
-    QString path, nombre, pathFoto;
+    QString path,nombre,pathFoto;
     QFile *file;
-    QStringList listaCanchas;
-    QStringList listaFechas;
-    QStringList listaJugadores;
+    QStringList listaCanchas,listaFechas,listaJugadores;
     corners esquinas;
-    int ancho,alto;
     Config lastConfig;
     DbManager::PerfilBlock perfilBuscado, perfilNuevo;
-    int maxPulso[11], minPulso[11], actualPulso[11];
+    int maxPulso[11],minPulso[11],actualPulso[11];
+    int pulsoProm,pulsoMax,pulsoMin;
+    float maxVelocidad;
 };
 
 #endif // MAINWINDOW_H

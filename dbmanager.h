@@ -14,6 +14,7 @@ public:
         int longitud;
         int velocidad;
         int pulsacion;
+        QTime hora;
         QDate fecha;
     };
 

@@ -16,9 +16,7 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     duthread.cpp \
     qcustomplot.cpp \
-    dialog_nuevo.cpp \
     dbmanager.cpp \
-    dialog_hrate.cpp \
     dialognewcourt.cpp \
     dialog_selectcourt.cpp \
     dialog_conexion.cpp \
@@ -27,17 +25,13 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     duthread.h \
     qcustomplot.h \
-    dialog_nuevo.h \
     dbmanager.h \
-    dialog_hrate.h \
     dialognewcourt.h \
     dialog_selectcourt.h \
     dialog_conexion.h \
     dialog_gps.h
 
 FORMS    += mainwindow.ui \
-    dialog_nuevo.ui \
-    dialog_hrate.ui \
     dialognewcourt.ui \
     dialog_selectcourt.ui \
     dialog_conexion.ui \
