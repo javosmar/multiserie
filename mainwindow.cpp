@@ -241,7 +241,7 @@ void MainWindow::Serial_Pedir()
     DbManager::DataBlock data;
     if(serial->bytesAvailable() >= 24){
         data.validez = serial->read(1);
-        if(data.validez != "q"){
+        if(data.validez < "q"){
             QString lat = serial->read(2);
             int lat_minutos = serial->read(6).toInt(&ok) / 0.6;
             lat.append(QString::number(lat_minutos));
