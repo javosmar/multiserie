@@ -10,7 +10,7 @@ double fi_rad, alfa_rad;
 int m1, n1, m2, n2, m3, n3, m4, n4, m5, n5, m6, n6, m7, n7, m8, n8, xprima, yprima, X1, Y1;  //esquinas mapeadas
 
 int cont_rep;
-int vector[1500][1500], vector2[col][fil];
+float vector2[col][fil];
 float vector3[col][fil];
 double max = 0;
 
@@ -50,39 +50,6 @@ MainWindow::~MainWindow()
 {
     lastConfiguration();
     delete ui;
-}
-
-void MainWindow::mostrarDatos()
-{
-    for(int indice=0;indice<1500;indice++)
-        for(int jndice=0;jndice<1500;jndice++)
-            vector[indice][jndice] = 0;
-    for(int indice=0;indice<col;indice++)
-        for(int jndice=0;jndice<fil;jndice++)
-            vector2[indice][jndice] = 0;
-    cont_rep = 0;
-    QString consulta;
-    consulta.append("SELECT * FROM ");
-    consulta.append(nombre);
-    QSqlQuery mostrar;
-    mostrar.prepare(consulta);
-    if(!mostrar.exec()){
-        qDebug() << "ERROR! " << mostrar.lastError();
-    }
-    max = 0;
-    QDate fecha;
-    while(mostrar.next()){
-        int x = mostrar.value(3).toInt(&ok);
-        int y = mostrar.value(2).toInt(&ok);
-        int m = Mapeo_x(x,y);
-        int n = Mapeo_y(x,y);
-        int j = m / div;
-        int k = n / div;
-        vector[m][n] = vector[m][n] + 1;
-        vector2[j][k] = vector2[j][k] + 1;
-        if((vector2[j][k] > max))
-            max = vector2[j][k];
-    }
 }
 
 void MainWindow::mostrarFechas(const QString &name)
@@ -298,15 +265,27 @@ void MainWindow::filtroMatricial()
                 G = vector2[i-1][j+1];
                 H = vector2[i][j+1];
                 I = vector2[i+1][j+1];
-                vector3[i-1][j-1] = (A + E)*0.3;
-                vector3[i][j-1] = (B + E)*0.75;
-                vector3[i+1][j-1] = (C + E)*0.3;
-                vector3[i-1][j] = (D + E)*0.75;
+                vector3[i-1][j-1] = A;
+                vector3[i][j-1] = B;
+                vector3[i+1][j-1] = C;
+                vector3[i-1][j] = D;
                 vector3[i][j] = E;
-                vector3[i+1][j] = (F + E)*0.75;
-                vector3[i-1][j+1] = (G + E)*0.3;
-                vector3[i][j+1] = (H + E)*0.75;
-                vector3[i+1][j+1] = (I + E)*0.3;
+                vector3[i+1][j] = F;
+                vector3[i-1][j+1] = G;
+                vector3[i][j+1] = H;
+                vector3[i+1][j+1] = I;
+                //                vector3[i-1][j-1] = (A + E)*0.3;
+                //                vector3[i][j-1] = (B + E)*0.75;
+                //                vector3[i+1][j-1] = (C + E)*0.3;
+                //                vector3[i-1][j] = (D + E)*0.75;
+                //                vector3[i][j] = E;
+                //                vector3[i+1][j] = (F + E)*0.75;
+                //                vector3[i-1][j+1] = (G + E)*0.3;
+                //                vector3[i][j+1] = (H + E)*0.75;
+                //                vector3[i+1][j+1] = (I + E)*0.3;
+
+//                vector3[i][j] = (A + B + C + D + E + F + G + H + I) / 9;
+
             }
         }
 }
@@ -361,7 +340,9 @@ double MainWindow::Mapeo_x(double x, double y)
 double MainWindow::Mapeo_y(double x, double y)
 {
     yprima = (X1 - x + (y - Y1)*qSin(alfa_rad)*qCos(alfa_rad) - (X1 - x)*pow(cos(alfa_rad),2)) / qSin(alfa_rad);
-    yprima = yprima - xprima * tan(0.085);
+    yprima = yprima;// - xprima * tan(0.02); //0.085);
+//    if(yprima < 0)
+//        yprima = 0;
     return yprima;
 }
 
@@ -518,6 +499,7 @@ void MainWindow::buscarFecha()
     maxVelocidad = 0;
     pulsoMax = 0;
     pulsoMin = 220;
+    int pulsoAct;
     coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
     QDate fechaBuscada = dialogoGps->obtenerFecha();
     if(listaFechas.contains(fechaBuscada.toString("dd-MM-yyyy"))){
@@ -533,7 +515,8 @@ void MainWindow::buscarFecha()
             qDebug() << "ERROR! " << mostrar.lastError();
         }
         while(mostrar.next()){
-            dialogoGps->setTiempoPulso(mostrar.value(4).toTime(),mostrar.value(3).toInt(&ok));
+            pulsoAct = mostrar.value(3).toInt(&ok);
+            dialogoGps->setTiempoPulso(mostrar.value(4).toTime(),pulsoAct);
             if(mostrar.value(2).toInt(&ok) > maxVelocidad)
                 maxVelocidad = mostrar.value(2).toInt(&ok);
             if(mostrar.value(3).toInt(&ok) > pulsoMax)
@@ -546,8 +529,12 @@ void MainWindow::buscarFecha()
             int y = mostrar.value(0).toInt(&ok);
             int m = Mapeo_x(x,y);
             int n = Mapeo_y(x,y);
-            int j = m / div;
-            int k = n / div;
+            int j = m / div - 4;
+            int k = n / div + 20;
+            if(j < 0 || j > col)
+                j = 0;
+            if(k < 0 || k > fil)
+                k = 0;
             vector2[j][k] = vector2[j][k] + 1;
             if((vector2[j][k] > max))
                 max = vector2[j][k];

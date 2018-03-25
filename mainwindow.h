@@ -52,7 +52,6 @@ public:
             QDate fecha;
     };
     //------------
-    void mostrarDatos();
     void mostrarFechas(const QString &name);
     //-----------
     Q_INVOKABLE bool nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso);

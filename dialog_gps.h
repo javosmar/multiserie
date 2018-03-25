@@ -4,9 +4,9 @@
 #include <QDialog>
 #include <qcustomplot.h>
 
-#define col 110
-#define fil 64
-#define div 5
+#define col 118     //97  //110   #define col 95  95  95
+#define fil 82    //70  //64    #define fil 73  76  65
+#define div 5.1   //6.3 //      #define div 6.5 6.5 6.5
 
 namespace Ui {
 class Dialog_Gps;
@@ -20,7 +20,7 @@ public:
     explicit Dialog_Gps(QWidget *parent = 0);
     ~Dialog_Gps();
 
-    void plot(float vector[][fil],int);
+    void plot(float vector[][fil], int columnas);
     void setListaFechas(QStringList);
     QDate obtenerFecha();
     void setGrafPulsos();

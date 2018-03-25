@@ -35,12 +35,12 @@ void Dialog_Gps::on_pushButtonCerrar_clicked()
     this->close();
 }
 
-void Dialog_Gps::plot(float vector[][fil], int filas)
+void Dialog_Gps::plot(float vector[][fil], int columnas)
 {
     ui->plot->clearGraphs();
     ui->plot->axisRect()->setupFullAxesBox(true);
     QCPColorMap *colorMap = new QCPColorMap(ui->plot->xAxis, ui->plot->yAxis);
-    int nx = filas;
+    int nx = columnas;
     int ny = fil;
     double x, y, z;
     colorMap->data()->setSize(nx, ny);
@@ -59,11 +59,10 @@ void Dialog_Gps::plot(float vector[][fil], int filas)
     colorScale->axis()->setVisible(false);
     QCPColorGradient miGradiente;
     miGradiente.clearColorStops();
-//    miGradiente.setColorStopAt(0.0,QColor("White"));
     miGradiente.setColorStopAt(0.0,QColor("Blue"));
-    miGradiente.setColorStopAt(0.6,QColor("Yellow"));
-    miGradiente.setColorStopAt(0.9,QColor("Orange"));
-    miGradiente.setColorStopAt(1.0,QColor("Dark red"));
+    miGradiente.setColorStopAt(0.5,QColor("Yellow"));
+//    miGradiente.setColorStopAt(0.9,QColor("Orange"));
+    miGradiente.setColorStopAt(1.0,QColor("Red"));
     colorMap->setGradient(miGradiente);
 //  rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
     colorMap->rescaleDataRange();
@@ -94,10 +93,23 @@ void Dialog_Gps::plot(float vector[][fil], int filas)
             r = pixel.red();
             g = pixel.green();
             b = pixel.blue();
-            if(pixel == QColor("Blue"))
+
+            if(pixel == QColor("Blue")){
                 image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,0));
-            else
+            }
+            else if(b > 250 && r < 50 && g < 50){
+                image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,127));
+            }
+            else{
                 image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,255));
+            }
+
+//            if(pixel == QColor("Blue")){
+//                image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,0));
+//            }
+//            else{
+//                image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,255));
+//            }
         }
     ui->label_3->setPixmap(QPixmap::fromImage(image2));
     QPixmap cancha;
