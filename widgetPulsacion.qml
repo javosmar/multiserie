@@ -92,7 +92,24 @@ Item {
                 text: 'Avanzar'
                 font.pointSize: 15
                 onClicked: {
+                    mainWidget.habilitarConexion();
                     stack.push(pulsacion);
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: buttonAnimIn
+                    running: buttonAtras.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonAtras; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: profileAnimOut
+                    running: !buttonAtras.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonAtras; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
             }
         }
@@ -102,12 +119,12 @@ Item {
         id: pulsacion
 
         Item {
+            property bool visibilidad: false
 
             Component.onCompleted: {
                 grilla.model.clear();
                 var listaJugadores = mainWidget.obtenerListaJugadores();
                 if(listaJugadores.length !== 0){
-//                mainWidget.calculoPrevioMaxMin();
                 var maxPulso
                 var minPulso
                 for(var ix=0;ix<listaJugadores.length;ix++){
@@ -125,7 +142,8 @@ Item {
                                                 Altura: jugador[3],
                                                 Pulso: "AVG",
                                                 Max: maxPulso,
-                                                Min: minPulso});
+                                                Min: minPulso,
+                                                visibilidad: false});
                     }
                 }
                 }
@@ -201,12 +219,36 @@ Item {
                     }
 
                     MouseArea {
+                        id: perfil
                         anchors.fill: myParent
                         enabled: !buttonConectar.estadoConexion
 
                         onClicked: {
                             mainWidget.setNombre(Jugador);
-                            mainWidget.MostrarAnalisis();
+                            mainWidget.mostrarAnalisis();
+                        }
+                        hoverEnabled: true;
+                        property bool señalado: false
+                        onEntered: {
+                            señalado = true;
+                        }
+                        onExited: {
+                            señalado = false;
+                        }
+
+                        SequentialAnimation{
+                            id: profileAnimIn
+                            running: perfil.señalado
+                            alwaysRunToEnd: true
+
+                            PropertyAnimation { target: myParent; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                        }
+                        SequentialAnimation{
+                            id: profileAnimOut
+                            running: !perfil.señalado
+                            alwaysRunToEnd: true
+
+                            PropertyAnimation { target: myParent; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                         }
                     }
 
@@ -248,13 +290,14 @@ Item {
                         source: "qrc:/Icons/heart.png"
                         smooth: true
                         antialiasing: true
-                        visible: buttonConectar.estadoConexion
+                        visible: visibilidad && buttonConectar.estadoConexion
 
                         SequentialAnimation{
                             id: heartAnim
                             running: buttonConectar.estadoConexion
                             loops: Animation.Infinite
                             alwaysRunToEnd: true
+
                             PropertyAnimation { target: heart; property: "scale"; to: 1.2; duration: 500; easing.type: Easing.InQuad }
                             PropertyAnimation { target: heart; property: "scale"; to: 1.0; duration: 500; easing.type: Easing.OutQuad }
                         }
@@ -265,28 +308,35 @@ Item {
 //                              codigo para detectar unidades online y offline
                             }
                         }
+                    }
+                }
+            }
 
-                        Timer {
-                            interval: 1000
-                            running: buttonConectar.estadoConexion
-                            repeat: true
 
-                            onTriggered: {
-                                var listaJugadores = mainWidget.obtenerListaJugadores();
-                                var maxPulso
-                                var minPulso
-                                var actualPulso
-                                for(var ix=0;ix<listaJugadores.length;ix++){
-                                    var Jugador = listaJugadores[ix];
-                                    maxPulso = mainWidget.obtenerPulsacionMaxima(ix);
-                                    minPulso = mainWidget.obtenerPulsacionMinima(ix);
-                                    actualPulso = mainWidget.obtenerPulsacionActual(ix);
-                                    grilla.model.get(ix).Pulso = actualPulso
-                                    grilla.model.get(ix).Max = maxPulso
-                                    grilla.model.get(ix).Min = minPulso
-                                }
-                            }
-                        }
+            Timer {
+                id: timer
+                interval: 1000
+                running: buttonConectar.estadoConexion
+                repeat: true
+
+                property bool estadoOnline: false
+
+                onTriggered: {
+                    var listaJugadores = mainWidget.obtenerListaJugadores();
+                    var maxPulso
+                    var minPulso
+                    var actualPulso
+                    var estado
+                    for(var ix=0;ix<listaJugadores.length;ix++){
+                        var Jugador = listaJugadores[ix];
+                        maxPulso = mainWidget.obtenerPulsacionMaxima(ix);
+                        minPulso = mainWidget.obtenerPulsacionMinima(ix);
+                        actualPulso = mainWidget.obtenerPulsacionActual(ix);
+                        estado = mainWidget.obtenerEstado(ix);
+                        grilla.model.get(ix).Pulso = actualPulso
+                        grilla.model.get(ix).Max = maxPulso
+                        grilla.model.get(ix).Min = minPulso
+                        grilla.model.get(ix).visibilidad = estado
                     }
                 }
             }
@@ -302,7 +352,24 @@ Item {
                 enabled: !buttonConectar.estadoConexion
 
                 onClicked: {
+                    mainWidget.deshabilitarConexion();
                     stack.push(crearJugador);
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: buttonAnimIn
+                    running: buttonNuevoJugador.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonNuevoJugador; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: buttonAnimOut
+                    running: !buttonNuevoJugador.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonNuevoJugador; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
             }
 
@@ -318,6 +385,22 @@ Item {
                 checked: estadoConexion
                 onClicked: {
                     mainWidget.on_actionSerialConect_triggered();
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: button2AnimIn
+                    running: buttonConectar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonConectar; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: button2AnimOut
+                    running: !buttonConectar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonConectar; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
 
                 property bool estadoConexion: false
@@ -355,7 +438,24 @@ Item {
                 enabled: !buttonConectar.estadoConexion
 
                 onClicked: {
+                    mainWidget.deshabilitarConexion();
                     stack.push(inicio);
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: button3AnimIn
+                    running: buttonInicio.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonInicio; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: button3AnimOut
+                    running: !buttonInicio.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonInicio; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
             }
         }
@@ -457,12 +557,36 @@ Item {
                         source: source1
                         property string source1: "qrc:/noPhoto.png"
 
-
                         MouseArea {
+                            id: perfilFoto
                             anchors.fill: picNuevoPerfil
                             property string source2: "data:image/png;base64,"
                             onClicked: {
                                 picNuevoPerfil.source = source2 + mainWidget.cargarPhoto_clicked();
+                            }
+
+                            hoverEnabled: true;
+                            property bool señalado: false
+                            onEntered: {
+                                señalado = true;
+                            }
+                            onExited: {
+                                señalado = false;
+                            }
+
+                            SequentialAnimation{
+                                id: profileAnimIn
+                                running: perfilFoto.señalado
+                                alwaysRunToEnd: true
+
+                                PropertyAnimation { target: picNuevoPerfil; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                            }
+                            SequentialAnimation{
+                                id: profileAnimOut
+                                running: !perfilFoto.señalado
+                                alwaysRunToEnd: true
+
+                                PropertyAnimation { target: picNuevoPerfil; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                             }
                         }
                     }
@@ -481,8 +605,26 @@ Item {
                 onClicked: {
                     var flag = mainWidget.nuevoJugador(nombreTextField.text,fechaTextField.text,
                                             alturaTextField.text,pesoTextField.text);
-                    if(flag)
+                    if(flag){
                         stack.push(pulsacion);
+                        mainWidget.habilitarConexion();
+                    }
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: buttonAnimIn
+                    running: buttonGuardar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonGuardar; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: buttonAnimOut
+                    running: !buttonGuardar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonGuardar; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
             }
 
@@ -496,7 +638,24 @@ Item {
                 font.pointSize: 15
 
                 onClicked: {
+                    mainWidget.habilitarConexion();
                     stack.push(pulsacion);
+                }
+
+                hoverEnabled: true
+                SequentialAnimation{
+                    id: button2AnimIn
+                    running: buttonCancelar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonCancelar; property: "scale"; to: 1.0; duration: 150; easing.type: Easing.InQuad }
+                }
+                SequentialAnimation{
+                    id: button2AnimOut
+                    running: !buttonCancelar.hovered
+                    alwaysRunToEnd: true
+
+                    PropertyAnimation { target: buttonCancelar; property: "scale"; to: 0.95; duration: 150; easing.type: Easing.OutQuad }
                 }
             }
         }

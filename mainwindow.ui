@@ -72,14 +72,8 @@
     <addaction name="separator"/>
     <addaction name="action_Configurar_Conexi_n"/>
    </widget>
-   <widget class="QMenu" name="menu_Position">
-    <property name="title">
-     <string>&amp;GPS</string>
-    </property>
-   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
-   <addaction name="menu_Position"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="layoutDirection">

@@ -39,16 +39,19 @@ MainWindow::MainWindow(QWidget *parent) :
     //-----QML------
     ui->quickWidget->rootContext()->setContextProperty("mainWidget",this);
     ui->quickWidget->setSource(QUrl(QStringLiteral("qrc:/widgetPulsacion.qml")));
-
     this->showMaximized();
-    openDatabase();
 
+    deshabilitarConexion();
+
+    openDatabase();
     initConfiguration();
 }
 
 MainWindow::~MainWindow()
 {
     lastConfiguration();
+    if(estado_serial)
+        Serial_Desconect();
     delete ui;
 }
 
@@ -173,6 +176,15 @@ void MainWindow::Serial_Conect()
         for(int i=0;i<11;i++){
             maxPulso[i] = 0;
             minPulso[i] = 220;
+            actualPulso[i] = 0;
+            actualEstado[i] = false;
+            ui->actionNew->setEnabled(false);
+            ui->actionAdd_Court->setEnabled(false);
+            ui->action_Seleccionar_Cancha->setEnabled(false);
+            ui->action_Configurar_Conexi_n->setEnabled(false);
+            ui->actionserialConfig->setEnabled(false);
+            ui->actionJugador->setEnabled(false);
+            ui->actionCancha->setEnabled(false);
         }
         ui->actionSerialConect->setIcon(QPixmap("://Icons/png/010-player.png"));
         emit serialConected();
@@ -190,6 +202,13 @@ void MainWindow::Serial_Desconect()
     estado_serial = false;
     mThread->terminate();
     ui->actionSerialConect->setIcon(QPixmap("://Icons/png/032-play-arrow.png"));
+    ui->actionNew->setEnabled(true);
+    ui->actionAdd_Court->setEnabled(true);
+    ui->action_Seleccionar_Cancha->setEnabled(true);
+    ui->action_Configurar_Conexi_n->setEnabled(true);
+    ui->actionserialConfig->setEnabled(true);
+    ui->actionJugador->setEnabled(true);
+    ui->actionCancha->setEnabled(true);
     emit serialDesconected();
 }
 
@@ -206,20 +225,26 @@ void MainWindow::Serial_Pedir()
 {
     int n;
     DbManager::DataBlock data;
-    if(serial->bytesAvailable() >= 24){
+    if(serial->bytesAvailable() >= 13){
         data.validez = serial->read(1);
         if(data.validez < "q"){
-            QString lat = serial->read(2);
-            int lat_minutos = serial->read(6).toInt(&ok) / 0.6;
+            QString lat = "44";                 //acomodar los valores recibidos
+            lat.append(serial->read(5));
+            int lat_minutos = lat.toInt(&ok) / 6;
+            lat.clear();
+            lat = "31";
             lat.append(QString::number(lat_minutos));
             data.latitud = lat.toInt(&ok);
-            serial->read(2);
-            QString lon = serial->read(2);
-            int lon_minutos = serial->read(6).toInt(&ok) / 0.6;
+
+            QString lon = "30";
+            lon.append(serial->read(5));
+            int lon_minutos = lon.toInt(&ok) / 6;
+            lon.clear();
+            lon = "60";
             lon.append(QString::number(lon_minutos));
             data.longitud = lon.toInt(&ok);
-            serial->read(1);
-            data.velocidad = serial->read(3).toInt(&ok);
+
+            data.velocidad = serial->read(1).toHex().toInt(&ok,16);
             data.pulsacion = serial->read(1).toHex().toInt(&ok,16);
             data.hora = QTime::currentTime();
             data.fecha = QDate::currentDate();
@@ -231,10 +256,11 @@ void MainWindow::Serial_Pedir()
             actualPulso[n] = data.pulsacion;
             nombre = nombreCamiseta(n);
             db->addData(nombre,data);
+            actualEstado[n] = true;
         }
         else
-            serial->read(23);
-        qDebug() << data.validez << data.pulsacion;
+            serial->read(12);
+//        qDebug() << data.validez << data.pulsacion;
     }
 }
 
@@ -338,9 +364,9 @@ double MainWindow::Mapeo_x(double x, double y)
 }
 
 double MainWindow::Mapeo_y(double x, double y)
-{
+{                                       //CORRECCION DE ANGULO
     yprima = (X1 - x + (y - Y1)*qSin(alfa_rad)*qCos(alfa_rad) - (X1 - x)*pow(cos(alfa_rad),2)) / qSin(alfa_rad);
-    yprima = yprima;// - xprima * tan(0.02); //0.085);
+    yprima = yprima + xprima * tan(0.12);// - xprima * tan(0.02); //0.085);
 //    if(yprima < 0)
 //        yprima = 0;
     return yprima;
@@ -384,7 +410,7 @@ void MainWindow::agregarCancha()
     writeFile(cancha);
 }
 
-void MainWindow::MostrarAnalisis()
+void MainWindow::mostrarAnalisis()
 {
     mostrarFechas(nombre);
     dialogoGps->setListaFechas(listaFechas);
@@ -430,6 +456,13 @@ QString MainWindow::obtenerPulsacionActual(int numero)
     return QString::number(pulso);
 }
 
+bool MainWindow::obtenerEstado(int numero)
+{
+    bool estate = actualEstado[numero];
+    actualEstado[numero] = false;
+    return estate;
+}
+
 void MainWindow::on_action_Seleccionar_Cancha_triggered()
 {
     connect(dialogoSelectCourt,SIGNAL(senal()),this,SLOT(seleccionCancha()));
@@ -466,6 +499,8 @@ void MainWindow::setCom()
 void MainWindow::on_actionClose_triggered()
 {
     lastConfiguration();
+    if(estado_serial)
+        Serial_Desconect();
     close();
 }
 
@@ -525,12 +560,30 @@ void MainWindow::buscarFecha()
                 pulsoMin = mostrar.value(3).toInt(&ok);
             acumulador += mostrar.value(3).toInt(&ok);
             contador++;
+                                                    //agregado
+
             int x = mostrar.value(1).toInt(&ok);
             int y = mostrar.value(0).toInt(&ok);
+            //-----------------------
+//            QString xprimero = mostrar.value(1).toString().right(5);
+//            QString yprimero = mostrar.value(0).toString().right(5);
+//            int aux = xprimero.prepend("30").toInt(&ok) / 6;
+//            xprimero.clear();
+//            xprimero = "60";
+//            xprimero.append(QString::number(aux));
+//            int x = xprimero.toInt(&ok);
+
+//            int aux1 = yprimero.prepend("44").toInt(&ok) / 6;
+//            yprimero.clear();
+//            yprimero = "31";
+//            yprimero.append(QString::number(aux1));
+//            int y = yprimero.toInt(&ok);
+//            qDebug() << xprimero << x << yprimero << y;
+            //-----------------------
             int m = Mapeo_x(x,y);
             int n = Mapeo_y(x,y);
-            int j = m / div - 4;
-            int k = n / div + 20;
+            int j = m / div - 4;        //CORRECCION DE CORRIMIENTO
+            int k = n / div - 32;   // + 18;//+ 20;
             if(j < 0 || j > col)
                 j = 0;
             if(k < 0 || k > fil)
@@ -540,7 +593,7 @@ void MainWindow::buscarFecha()
                 max = vector2[j][k];
         }
         pulsoProm = acumulador / contador;
-        if(maxVelocidad < 100)
+        if(maxVelocidad < 100)              //cálculo de velocidad
             maxVelocidad = 0;
         maxVelocidad = maxVelocidad * 1.85 / 100;
         dialogoGps->setDatos(maxVelocidad,pulsoMax,pulsoMin,pulsoProm);
@@ -739,6 +792,30 @@ void MainWindow::calculoPrevioMaxMin()
                 maxPulso[i] = pulso;
         }
     }
+}
+
+void MainWindow::habilitarConexion()
+{
+    ui->actionNew->setEnabled(true);
+    ui->actionAdd_Court->setEnabled(true);
+    ui->action_Seleccionar_Cancha->setEnabled(true);
+    ui->action_Configurar_Conexi_n->setEnabled(true);
+    ui->actionserialConfig->setEnabled(true);
+    ui->actionJugador->setEnabled(true);
+    ui->actionCancha->setEnabled(true);
+    ui->actionSerialConect->setEnabled(true);
+}
+
+void MainWindow::deshabilitarConexion()
+{
+    ui->actionNew->setEnabled(false);
+    ui->actionAdd_Court->setEnabled(false);
+    ui->action_Seleccionar_Cancha->setEnabled(false);
+    ui->action_Configurar_Conexi_n->setEnabled(false);
+    ui->actionserialConfig->setEnabled(false);
+    ui->actionJugador->setEnabled(false);
+    ui->actionCancha->setEnabled(false);
+    ui->actionSerialConect->setEnabled(false);
 }
 
 QString MainWindow::cargarPhoto_clicked()

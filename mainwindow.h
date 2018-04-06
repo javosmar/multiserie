@@ -62,11 +62,14 @@ public:
     Q_INVOKABLE bool on_actionSerialConect_triggered();
     Q_INVOKABLE void on_actionNew_triggered();
     Q_INVOKABLE void setNombre(const QString &name);
-    Q_INVOKABLE void MostrarAnalisis();
+    Q_INVOKABLE void mostrarAnalisis();
     Q_INVOKABLE QString obtenerPulsacionMaxima(int numero);
     Q_INVOKABLE QString obtenerPulsacionMinima(int numero);
     Q_INVOKABLE QString obtenerPulsacionActual(int numero);
+    Q_INVOKABLE bool obtenerEstado(int numero);
     Q_INVOKABLE void calculoPrevioMaxMin();
+    Q_INVOKABLE void habilitarConexion();
+    Q_INVOKABLE void deshabilitarConexion();
 
 signals:
     void serialConected();
@@ -123,6 +126,7 @@ private:
     Config lastConfig;
     DbManager::PerfilBlock perfilBuscado, perfilNuevo;
     int maxPulso[11],minPulso[11],actualPulso[11];
+    bool actualEstado[11];
     int pulsoProm,pulsoMax,pulsoMin;
     float maxVelocidad;
 };
