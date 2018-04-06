@@ -76,7 +76,7 @@ Item {
                 Text {
                     id: subtitulo
                     font.pointSize: 17
-                    text: "Tracking GPS para deportes de equipo"
+                    text: "Tracker GPS para deportes de equipo"
                     anchors.top: titulo.bottom
                     anchors.horizontalCenter: backCat.horizontalCenter
                     color: 'white'
