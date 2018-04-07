@@ -429,20 +429,20 @@ void MainWindow::mostrarAnalisis()
 QString MainWindow::obtenerPulsacionMaxima(int numero)
 {
     int pulso = maxPulso[numero];
-    if((pulso < 40)||(pulso > 200)){
-        pulso = 0;
-        return "max";
-    }
+//    if((pulso < 40)||(pulso > 255)){        //problema de maxima pulsacion
+//        pulso = 0;
+//        return "max";
+//    }
     return QString::number(pulso);
 }
 
 QString MainWindow::obtenerPulsacionMinima(int numero)
 {
     int pulso = minPulso[numero];
-    if((pulso < 40)||(pulso > 200)){
-        pulso = 0;
-        return "min";
-    }
+//    if((pulso < 40)||(pulso > 200)){
+//        pulso = 0;
+//        return "min";
+//    }
     return QString::number(pulso);
 }
 
