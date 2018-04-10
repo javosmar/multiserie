@@ -60,8 +60,8 @@ void Dialog_Gps::plot(float vector[][fil], int columnas)
     QCPColorGradient miGradiente;
     miGradiente.clearColorStops();
     miGradiente.setColorStopAt(0.0,QColor("Blue"));
+    miGradiente.setColorStopAt(0.3,QColor("Yellow"));
     miGradiente.setColorStopAt(0.5,QColor("Yellow"));
-//    miGradiente.setColorStopAt(0.9,QColor("Orange"));
     miGradiente.setColorStopAt(1.0,QColor("Red"));
     colorMap->setGradient(miGradiente);
 //  rescale the data dimension (color) such that all data points lie in the span visualized by the color gradient:
@@ -244,7 +244,7 @@ void Dialog_Gps::setDatos(const float &maxVel, const int &maxPul, const int &min
     ui->labelMaxPulsaciones->setText(QString::number(maxPul).append(" ppm"));
     ui->labelMinPulsaciones->setText(QString::number(minPul).append(" ppm"));
     ui->labelPromPulsaciones->setText(QString::number(promPul).append(" ppm"));
-    ui->labelVelocidad->setText(QString::number(maxVel,'f',2).append(" km/h"));
+    ui->labelVelocidad->setText(QString::number(maxVel,'f',2).append(" m/s"));
 }
 
 void Dialog_Gps::on_comboBoxFecha_activated(const QString &arg1)

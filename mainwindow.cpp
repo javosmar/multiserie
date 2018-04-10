@@ -45,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     openDatabase();
     initConfiguration();
+    for(int i = 0; i < 11; i++){
+        maxPulso[i] = 0;
+        minPulso[i] = 300;
+    }
 }
 
 MainWindow::~MainWindow()
@@ -561,7 +565,6 @@ void MainWindow::buscarFecha()
             acumulador += mostrar.value(3).toInt(&ok);
             contador++;
                                                     //agregado
-
             int x = mostrar.value(1).toInt(&ok);
             int y = mostrar.value(0).toInt(&ok);
             //-----------------------
@@ -593,9 +596,9 @@ void MainWindow::buscarFecha()
                 max = vector2[j][k];
         }
         pulsoProm = acumulador / contador;
-        if(maxVelocidad < 100)              //cálculo de velocidad
-            maxVelocidad = 0;
-        maxVelocidad = maxVelocidad * 1.85 / 100;
+//        if(maxVelocidad < 100)              //cálculo de velocidad
+//            maxVelocidad = 0;
+        maxVelocidad = maxVelocidad;
         dialogoGps->setDatos(maxVelocidad,pulsoMax,pulsoMin,pulsoProm);
         filtroMatricial();
         dialogoGps->plot(vector3,col);
