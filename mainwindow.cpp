@@ -539,6 +539,7 @@ void MainWindow::buscarFecha()
     pulsoMax = 0;
     pulsoMin = 220;
     int pulsoAct;
+    float velAct;
     coordenadas(esquinas.corner1, esquinas.corner2, esquinas.corner3, esquinas.corner4);
     QDate fechaBuscada = dialogoGps->obtenerFecha();
     if(listaFechas.contains(fechaBuscada.toString("dd-MM-yyyy"))){
@@ -555,9 +556,10 @@ void MainWindow::buscarFecha()
         }
         while(mostrar.next()){
             pulsoAct = mostrar.value(3).toInt(&ok);
-            dialogoGps->setTiempoPulso(mostrar.value(4).toTime(),pulsoAct);
-            if(mostrar.value(2).toInt(&ok) > maxVelocidad)
-                maxVelocidad = mostrar.value(2).toInt(&ok);
+            velAct = mostrar.value(2).toInt(&ok) * 0.1;
+            dialogoGps->setTiempoPulso(mostrar.value(4).toTime(),pulsoAct,velAct);
+            if(velAct > maxVelocidad)
+                maxVelocidad = velAct;
             if(mostrar.value(3).toInt(&ok) > pulsoMax)
                 pulsoMax = mostrar.value(3).toInt(&ok);
             if(mostrar.value(3).toInt(&ok) < pulsoMin)
@@ -585,8 +587,8 @@ void MainWindow::buscarFecha()
             //-----------------------
             int m = Mapeo_x(x,y);
             int n = Mapeo_y(x,y);
-            int j = m / div - 4;        //CORRECCION DE CORRIMIENTO
-            int k = n / div - 32;   // + 18;//+ 20;
+            int j = m / div;// - 4;        //CORRECCION DE CORRIMIENTO
+            int k = n / div - 22;// - 32;   // + 18;//+ 20;
             if(j < 0 || j > col)
                 j = 0;
             if(k < 0 || k > fil)

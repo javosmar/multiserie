@@ -142,7 +142,8 @@ void Dialog_Gps::setGrafPulsos()
         for(int i = 0; i < filas; i++){
             tiempoFloat.append(tiempo[i].hour() * 3600 + tiempo[i].minute() * 60 + tiempo[i].second() + tiempo[i].msec() * 1.0 / 1000 - inicio);
         }
-        ui->plotPulse->graph()->setData(tiempoFloat,pulsos);
+        ui->plotPulse->graph(0)->setData(tiempoFloat,pulsos);
+        ui->plotPulse->graph(1)->setData(tiempoFloat,velocidades); //acomodar numeros de graf
         QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
         ui->plotPulse->xAxis->setTicker(timeTicker);
         timeTicker->setTimeFormat("%m:%s:%z");
@@ -152,10 +153,12 @@ void Dialog_Gps::setGrafPulsos()
     ui->plotPulse->replot();
 }
 
-void Dialog_Gps::setTiempoPulso(QTime time,int pulse)
+void Dialog_Gps::setTiempoPulso(QTime time,int pulse,float velocidad)
 {
     tiempo.append(time);
     pulsos.append(pulse);
+    velocidad = velocidad * 75;
+    velocidades.append(velocidad);
 }
 
 void Dialog_Gps::clearData()
@@ -170,6 +173,16 @@ void Dialog_Gps::clearData()
 void Dialog_Gps::initGrafPulsos()
 {
     ui->plotPulse->addGraph();
+//  estilos de la grafica
+    ui->plotPulse->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::white, 1.5), QBrush(Qt::white), 4));
+    ui->plotPulse->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
+
+    ui->plotPulse->addGraph();
+//  estilos de la grafica
+    ui->plotPulse->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::green, 1.5), QBrush(Qt::green), 4));
+    ui->plotPulse->graph(1)->setPen(QPen(QColor(120, 120, 120), 2));
+
+
     ui->plotPulse->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom);
     ui->plotPulse->axisRect()->setRangeZoom(Qt::Horizontal);
     ui->plotPulse->axisRect()->setRangeDrag(Qt::Horizontal);
@@ -228,7 +241,8 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis2->setTicks(false);
     ui->plotPulse->xAxis2->setTickLabels(false);
     ui->plotPulse->yAxis2->setTickLabels(false);
-    ui->plotPulse->graph(0)->setName("ppm en entrenamiento");
+    ui->plotPulse->graph(0)->setName("Pulsaciones");
+    ui->plotPulse->graph(1)->setName("Velocidad");
     ui->plotPulse->legend->setVisible(true);
     ui->plotPulse->legend->setBrush(QColor(255, 255, 255, 150)); 
     ui->plotPulse->replot();

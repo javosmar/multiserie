@@ -24,7 +24,7 @@ public:
     void setListaFechas(QStringList);
     QDate obtenerFecha();
     void setGrafPulsos();
-    void setTiempoPulso(QTime time, int pulse);
+    void setTiempoPulso(QTime time, int pulse, float velocidad);
     void clearData();
     void initGrafPulsos();
     void setNombre(const QString &name);
@@ -45,6 +45,7 @@ private:
     int i;
     QVector<QTime> tiempo;
     QVector<double> pulsos;
+    QVector<double> velocidades;
 };
 
 #endif // DIALOG_GPS_H
