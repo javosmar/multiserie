@@ -566,25 +566,8 @@ void MainWindow::buscarFecha()
                 pulsoMin = mostrar.value(3).toInt(&ok);
             acumulador += mostrar.value(3).toInt(&ok);
             contador++;
-                                                    //agregado
             int x = mostrar.value(1).toInt(&ok);
             int y = mostrar.value(0).toInt(&ok);
-            //-----------------------
-//            QString xprimero = mostrar.value(1).toString().right(5);
-//            QString yprimero = mostrar.value(0).toString().right(5);
-//            int aux = xprimero.prepend("30").toInt(&ok) / 6;
-//            xprimero.clear();
-//            xprimero = "60";
-//            xprimero.append(QString::number(aux));
-//            int x = xprimero.toInt(&ok);
-
-//            int aux1 = yprimero.prepend("44").toInt(&ok) / 6;
-//            yprimero.clear();
-//            yprimero = "31";
-//            yprimero.append(QString::number(aux1));
-//            int y = yprimero.toInt(&ok);
-//            qDebug() << xprimero << x << yprimero << y;
-            //-----------------------
             int m = Mapeo_x(x,y);
             int n = Mapeo_y(x,y);
             int j = m / div;// - 4;        //CORRECCION DE CORRIMIENTO

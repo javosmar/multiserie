@@ -46,6 +46,7 @@ private:
     QVector<QTime> tiempo;
     QVector<double> pulsos;
     QVector<double> velocidades;
+    float vMax;
 };
 
 #endif // DIALOG_GPS_H

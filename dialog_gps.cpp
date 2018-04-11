@@ -22,6 +22,7 @@ Dialog_Gps::Dialog_Gps(QWidget *parent) :
     ui->plot->yAxis2->setVisible(false);
     ui->plot->xAxis2->setVisible(false);
     ui->plot->setVisible(false);
+    vMax = 10;
     //-----pulsaciones-----
 }
 
@@ -149,6 +150,7 @@ void Dialog_Gps::setGrafPulsos()
         timeTicker->setTimeFormat("%m:%s:%z");
         ui->plotPulse->xAxis->setRange(0, final - inicio);
         ui->plotPulse->yAxis->setRange(0, fcmax);
+        ui->plotPulse->yAxis2->setRange(0, vMax);
     }
     ui->plotPulse->replot();
 }
@@ -157,7 +159,6 @@ void Dialog_Gps::setTiempoPulso(QTime time,int pulse,float velocidad)
 {
     tiempo.append(time);
     pulsos.append(pulse);
-    velocidad = velocidad * 75;
     velocidades.append(velocidad);
 }
 
@@ -172,17 +173,13 @@ void Dialog_Gps::clearData()
 
 void Dialog_Gps::initGrafPulsos()
 {
-    ui->plotPulse->addGraph();
-//  estilos de la grafica
+    ui->plotPulse->addGraph(ui->plotPulse->xAxis, ui->plotPulse->yAxis);
     ui->plotPulse->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::white, 1.5), QBrush(Qt::white), 4));
     ui->plotPulse->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
-
-    ui->plotPulse->addGraph();
-//  estilos de la grafica
+    ui->plotPulse->addGraph(ui->plotPulse->xAxis, ui->plotPulse->yAxis2);
     ui->plotPulse->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::green, 1.5), QBrush(Qt::green), 4));
     ui->plotPulse->graph(1)->setPen(QPen(QColor(120, 120, 120), 2));
-
-
+    //------------------
     ui->plotPulse->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom);
     ui->plotPulse->axisRect()->setRangeZoom(Qt::Horizontal);
     ui->plotPulse->axisRect()->setRangeDrag(Qt::Horizontal);
@@ -195,6 +192,12 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis->setSubTickPen(QPen(Qt::white, 1));
     ui->plotPulse->xAxis->setTickLabelColor(Qt::white);
     ui->plotPulse->yAxis->setTickLabelColor(Qt::white);
+
+    ui->plotPulse->yAxis2->setBasePen(QPen(Qt::white, 1));
+    ui->plotPulse->yAxis2->setTickPen(QPen(Qt::white, 1));
+    ui->plotPulse->yAxis2->setSubTickPen(QPen(Qt::white, 1));
+    ui->plotPulse->yAxis2->setTickLabelColor(Qt::white);
+
     ui->plotPulse->xAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
     ui->plotPulse->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
     ui->plotPulse->xAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
@@ -203,8 +206,8 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis->grid()->setSubGridVisible(true);
     ui->plotPulse->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     ui->plotPulse->yAxis->grid()->setZeroLinePen(Qt::NoPen);
-    ui->plotPulse->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-    ui->plotPulse->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+//    ui->plotPulse->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+//    ui->plotPulse->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
     plotGradient.setStart(0, 0);
     plotGradient.setFinalStop(0, 350);
     plotGradient.setColorAt(0, QColor(80, 80, 80));
@@ -235,12 +238,30 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis->setLabelFont(QFont(QFont().family(), 14));
     ui->plotPulse->xAxis->setLabelColor(QColor("White"));
     ui->plotPulse->yAxis->setLabelColor(QColor("White"));
-    ui->plotPulse->xAxis2->setVisible(true);
+    ui->plotPulse->xAxis2->setVisible(false);
     ui->plotPulse->yAxis2->setVisible(true);
-    ui->plotPulse->xAxis2->setTicks(false);
-    ui->plotPulse->yAxis2->setTicks(false);
-    ui->plotPulse->xAxis2->setTickLabels(false);
-    ui->plotPulse->yAxis2->setTickLabels(false);
+
+    QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);
+    textTicker2->addTick(vMax,"100");
+    textTicker2->addTick(vMax*0.9, "90");
+    textTicker2->addTick(vMax*0.8, "80");
+    textTicker2->addTick(vMax*0.7, "70");
+    textTicker2->addTick(vMax*0.6, "60");
+    textTicker2->addTick(vMax*0.5, "50");
+    textTicker2->addTick(vMax*0.4, "40");
+    textTicker2->addTick(vMax*0.3, "30");
+    ui->plotPulse->yAxis2->setTicker(textTicker2);
+    ui->plotPulse->yAxis2->setTickLabelFont(QFont(QFont().family(), 8));
+    ui->plotPulse->yAxis2->setLabel("% Vmax");
+    ui->plotPulse->yAxis2->setLabelFont(QFont(QFont().family(), 14));
+    ui->plotPulse->yAxis2->setLabelColor(QColor("White"));
+    ui->plotPulse->yAxis2->setTicks(true);
+    ui->plotPulse->yAxis2->setTickLabels(true);
+
+//    ui->plotPulse->xAxis2->setTicks(false);
+//    ui->plotPulse->yAxis2->setTicks(false);
+//    ui->plotPulse->xAxis2->setTickLabels(false);
+//    ui->plotPulse->yAxis2->setTickLabels(false);
     ui->plotPulse->graph(0)->setName("Pulsaciones");
     ui->plotPulse->graph(1)->setName("Velocidad");
     ui->plotPulse->legend->setVisible(true);
@@ -259,6 +280,7 @@ void Dialog_Gps::setDatos(const float &maxVel, const int &maxPul, const int &min
     ui->labelMinPulsaciones->setText(QString::number(minPul).append(" ppm"));
     ui->labelPromPulsaciones->setText(QString::number(promPul).append(" ppm"));
     ui->labelVelocidad->setText(QString::number(maxVel,'f',2).append(" m/s"));
+    vMax = maxVel;
 }
 
 void Dialog_Gps::on_comboBoxFecha_activated(const QString &arg1)
