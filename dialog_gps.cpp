@@ -23,11 +23,11 @@ Dialog_Gps::Dialog_Gps(QWidget *parent) :
     ui->plot->xAxis2->setVisible(false);
     ui->plot->setVisible(false);
     vMax = 10;
-    //-----pulsaciones-----
 }
 
 Dialog_Gps::~Dialog_Gps()
 {
+    clearData();
     delete ui;
 }
 
@@ -144,13 +144,15 @@ void Dialog_Gps::setGrafPulsos()
             tiempoFloat.append(tiempo[i].hour() * 3600 + tiempo[i].minute() * 60 + tiempo[i].second() + tiempo[i].msec() * 1.0 / 1000 - inicio);
         }
         ui->plotPulse->graph(0)->setData(tiempoFloat,pulsos);
+//        bars1->setData(tiempoFloat,velocidades);
+//        bars1->setWidth(40/(double)tiempoFloat.size());
         ui->plotPulse->graph(1)->setData(tiempoFloat,velocidades); //acomodar numeros de graf
         QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
         ui->plotPulse->xAxis->setTicker(timeTicker);
         timeTicker->setTimeFormat("%m:%s:%z");
         ui->plotPulse->xAxis->setRange(0, final - inicio);
         ui->plotPulse->yAxis->setRange(0, fcmax);
-        ui->plotPulse->yAxis2->setRange(0, vMax);
+        ui->plotPulse->yAxis2->setRange(0, vMax * 3);
     }
     ui->plotPulse->replot();
 }
@@ -167,6 +169,7 @@ void Dialog_Gps::clearData()
     ui->plotPulse->clearGraphs();
     tiempo.clear();
     pulsos.clear();
+    velocidades.clear();
     ui->plotPulse->replot();
     setDatos(0,0,0,0);
 }
@@ -174,13 +177,17 @@ void Dialog_Gps::clearData()
 void Dialog_Gps::initGrafPulsos()
 {
     ui->plotPulse->addGraph(ui->plotPulse->xAxis, ui->plotPulse->yAxis);
-    ui->plotPulse->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::white, 1.5), QBrush(Qt::white), 4));
-    ui->plotPulse->graph(0)->setPen(QPen(QColor(120, 120, 120), 2));
+    QColor color2(20+200/4.0*4,70*(1.6 - 4/4.0), 150, 150);
+    ui->plotPulse->graph(0)->setLineStyle(QCPGraph::lsLine);
+    ui->plotPulse->graph(0)->setPen(QPen(color2.lighter(200)));
+    ui->plotPulse->graph(0)->setBrush(QBrush(color2));
     ui->plotPulse->addGraph(ui->plotPulse->xAxis, ui->plotPulse->yAxis2);
-    ui->plotPulse->graph(1)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssSquare, QPen(Qt::green, 1.5), QBrush(Qt::green), 4));
-    ui->plotPulse->graph(1)->setPen(QPen(QColor(120, 120, 120), 2));
+    QColor color(20+200/4.0,70*(1.6/4.0), 150, 150);
+    ui->plotPulse->graph(1)->setLineStyle(QCPGraph::lsLine);
+    ui->plotPulse->graph(1)->setPen(QPen(color.lighter(200)));
+    ui->plotPulse->graph(1)->setBrush(QBrush(color));
     //------------------
-    ui->plotPulse->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom);
+    ui->plotPulse->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom|QCP::iSelectPlottables);
     ui->plotPulse->axisRect()->setRangeZoom(Qt::Horizontal);
     ui->plotPulse->axisRect()->setRangeDrag(Qt::Horizontal);
     ui->plotPulse->axisRect()->setupFullAxesBox(true);
@@ -206,8 +213,12 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis->grid()->setSubGridVisible(true);
     ui->plotPulse->xAxis->grid()->setZeroLinePen(Qt::NoPen);
     ui->plotPulse->yAxis->grid()->setZeroLinePen(Qt::NoPen);
-//    ui->plotPulse->xAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
-//    ui->plotPulse->yAxis->setUpperEnding(QCPLineEnding::esSpikeArrow);
+
+    ui->plotPulse->yAxis2->grid()->setPen(QPen(QColor(141, 231, 138), 1, Qt::DashLine));
+    ui->plotPulse->yAxis2->grid()->setVisible(true);
+    ui->plotPulse->yAxis2->grid()->setSubGridVisible(true);
+    ui->plotPulse->yAxis2->grid()->setZeroLinePen(Qt::NoPen);
+
     plotGradient.setStart(0, 0);
     plotGradient.setFinalStop(0, 350);
     plotGradient.setColorAt(0, QColor(80, 80, 80));
@@ -228,12 +239,11 @@ void Dialog_Gps::initGrafPulsos()
     textTicker->addTick(fcmax*0.6, "60");
     textTicker->addTick(fcmax*0.5, "50");
     textTicker->addTick(fcmax*0.4, "40");
-    textTicker->addTick(fcmax*0.3, "30");
     ui->plotPulse->yAxis->setTicker(textTicker);
     ui->plotPulse->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
     ui->plotPulse->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
     ui->plotPulse->xAxis->setLabel("Tiempo de entrenamiento [m:s:ms]");
-    ui->plotPulse->yAxis->setLabel("% fcmax");
+    ui->plotPulse->yAxis->setLabel("              % fcmax");
     ui->plotPulse->xAxis->setLabelFont(QFont(QFont().family(), 14));
     ui->plotPulse->yAxis->setLabelFont(QFont(QFont().family(), 14));
     ui->plotPulse->xAxis->setLabelColor(QColor("White"));
@@ -243,26 +253,17 @@ void Dialog_Gps::initGrafPulsos()
 
     QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);
     textTicker2->addTick(vMax,"100");
-    textTicker2->addTick(vMax*0.9, "90");
-    textTicker2->addTick(vMax*0.8, "80");
-    textTicker2->addTick(vMax*0.7, "70");
-    textTicker2->addTick(vMax*0.6, "60");
     textTicker2->addTick(vMax*0.5, "50");
-    textTicker2->addTick(vMax*0.4, "40");
-    textTicker2->addTick(vMax*0.3, "30");
+    textTicker2->addTick(vMax*0, "0");
     ui->plotPulse->yAxis2->setTicker(textTicker2);
     ui->plotPulse->yAxis2->setTickLabelFont(QFont(QFont().family(), 8));
-    ui->plotPulse->yAxis2->setLabel("% Vmax");
+    ui->plotPulse->yAxis2->setLabel("                       % Vmax");
     ui->plotPulse->yAxis2->setLabelFont(QFont(QFont().family(), 14));
     ui->plotPulse->yAxis2->setLabelColor(QColor("White"));
     ui->plotPulse->yAxis2->setTicks(true);
     ui->plotPulse->yAxis2->setTickLabels(true);
 
-//    ui->plotPulse->xAxis2->setTicks(false);
-//    ui->plotPulse->yAxis2->setTicks(false);
-//    ui->plotPulse->xAxis2->setTickLabels(false);
-//    ui->plotPulse->yAxis2->setTickLabels(false);
-    ui->plotPulse->graph(0)->setName("Pulsaciones");
+    ui->plotPulse->graph(0)->setName("Pulsación");
     ui->plotPulse->graph(1)->setName("Velocidad");
     ui->plotPulse->legend->setVisible(true);
     ui->plotPulse->legend->setBrush(QColor(255, 255, 255, 150)); 
@@ -288,5 +289,6 @@ void Dialog_Gps::on_comboBoxFecha_activated(const QString &arg1)
     selectedFecha = QDate::fromString(arg1,"dd-MM-yyyy");
     tiempo.clear();
     pulsos.clear();
+    velocidades.clear();
     emit senal();
 }
