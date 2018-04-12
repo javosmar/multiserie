@@ -104,13 +104,6 @@ void Dialog_Gps::plot(float vector[][fil], int columnas)
             else{
                 image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,255));
             }
-
-//            if(pixel == QColor("Blue")){
-//                image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,0));
-//            }
-//            else{
-//                image2.setPixelColor(QPoint(ix,iy),QColor(r,g,b,255));
-//            }
         }
     ui->label_3->setPixmap(QPixmap::fromImage(image2));
     QPixmap cancha;
@@ -144,12 +137,10 @@ void Dialog_Gps::setGrafPulsos()
             tiempoFloat.append(tiempo[i].hour() * 3600 + tiempo[i].minute() * 60 + tiempo[i].second() + tiempo[i].msec() * 1.0 / 1000 - inicio);
         }
         ui->plotPulse->graph(0)->setData(tiempoFloat,pulsos);
-//        bars1->setData(tiempoFloat,velocidades);
-//        bars1->setWidth(40/(double)tiempoFloat.size());
-        ui->plotPulse->graph(1)->setData(tiempoFloat,velocidades); //acomodar numeros de graf
+        ui->plotPulse->graph(1)->setData(tiempoFloat,velocidades);
         QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
         ui->plotPulse->xAxis->setTicker(timeTicker);
-        timeTicker->setTimeFormat("%m:%s:%z");
+        timeTicker->setTimeFormat("%m:%s");
         ui->plotPulse->xAxis->setRange(0, final - inicio);
         ui->plotPulse->yAxis->setRange(0, fcmax);
         ui->plotPulse->yAxis2->setRange(0, vMax * 3);
@@ -242,7 +233,7 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->yAxis->setTicker(textTicker);
     ui->plotPulse->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
     ui->plotPulse->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
-    ui->plotPulse->xAxis->setLabel("Tiempo de entrenamiento [m:s:ms]");
+    ui->plotPulse->xAxis->setLabel("Tiempo de entrenamiento [m:s]");
     ui->plotPulse->yAxis->setLabel("              % fcmax");
     ui->plotPulse->xAxis->setLabelFont(QFont(QFont().family(), 14));
     ui->plotPulse->yAxis->setLabelFont(QFont(QFont().family(), 14));
