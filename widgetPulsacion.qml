@@ -3,12 +3,10 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls 2.2
 import QtCharts 2.2
 
-
-
 Item {
     id: mainParent
     width: 1024
-    height: 768
+    height: 730
 
     property real anchoBoton: (mainParent.width - 20) / 3
     property int altoBoton: 50
@@ -18,7 +16,6 @@ Item {
         fillMode: Image.PreserveAspectCrop
         anchors.fill: parent
         source: "qrc:/Background/munich-allianz-arena-120289.jpeg"
-
     }
 
     StackView {
@@ -89,7 +86,7 @@ Item {
                 height: altoBoton
                 x: mainParent.width - buttonAtras.width - 5
                 y: mainParent.height - buttonAtras.height - 5
-                text: 'Avanzar'
+                text: 'AVANZAR'
                 font.pointSize: 15
                 onClicked: {
                     mainWidget.habilitarConexion();
@@ -345,9 +342,9 @@ Item {
                 id: buttonNuevoJugador
                 width: anchoBoton
                 height: altoBoton
-                x: 5
-                y: mainParent.height - buttonNuevoJugador.height - 5
-                text: 'Nuevo jugador'
+                x: mainParent.width - buttonInicio.width - 5
+                y: mainParent.height - buttonInicio.height - 5
+                text: 'NUEVO JUGADOR'
                 font.pointSize: 15
                 enabled: !buttonConectar.estadoConexion
 
@@ -404,17 +401,17 @@ Item {
                 }
 
                 property bool estadoConexion: false
-                property string textBoton: "Iniciar"
+                property string textBoton: "COMENZAR A ENTRENAR"
 
                 Connections {
                     target: mainWidget
                     onSerialConected: {
                         buttonConectar.estadoConexion = true
-                        buttonConectar.textBoton = "Finalizar"
+                        buttonConectar.textBoton = "FIN DEL ENTRENAMIENTO"
                     }
                     onSerialDesconected: {
                         buttonConectar.estadoConexion = false
-                        buttonConectar.textBoton = "Iniciar"
+                        buttonConectar.textBoton = "COMENZAR A ENTRENAR"
                     }
                 }
 
@@ -431,9 +428,9 @@ Item {
                 id: buttonInicio
                 width: anchoBoton
                 height: altoBoton
-                x: mainParent.width - buttonInicio.width - 5
-                y: mainParent.height - buttonInicio.height - 5
-                text: 'Inicio'
+                x: 5
+                y: mainParent.height - buttonNuevoJugador.height - 5
+                text: 'VOLVER'
                 font.pointSize: 15
                 enabled: !buttonConectar.estadoConexion
 
@@ -599,7 +596,7 @@ Item {
                 height: altoBoton
                 x: mainParent.width - buttonGuardar.width - 5
                 y: mainParent.height - buttonGuardar.height - 5
-                text: 'Guardar'
+                text: 'GUARDAR'
                 font.pointSize: 15
 
                 onClicked: {
@@ -634,7 +631,7 @@ Item {
                 height: altoBoton
                 x: 5
                 y: mainParent.height - buttonCancelar.height - 5
-                text: 'Cancelar'
+                text: 'CANCELAR'
                 font.pointSize: 15
 
                 onClicked: {
