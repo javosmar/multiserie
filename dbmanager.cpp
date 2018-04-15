@@ -181,7 +181,8 @@ bool DbManager::createTablePerfiles()
                     "photo LONGBLOB,"
                     "fecha BLOB,"
                     "altura INTEGER NOT NULL,"
-                    "peso INTEGER NOT NULL);");
+                    "peso INTEGER NOT NULL,"
+                    "maxppm INTEGER NOT NULL);");
     query.prepare(consulta);
     if (!query.exec())
     {
@@ -200,8 +201,8 @@ bool DbManager::addPerfil(PerfilBlock data)
     int dia, mes, ano;
     data.fecha.getDate(&ano,&mes,&dia);
     pedido.append("INSERT INTO perfiles");
-    pedido.append(" (nombre,photo,fecha,altura,peso) "
-                  "VALUES (:nombre,:photo,:fecha,:altura,:peso)");
+    pedido.append(" (nombre,photo,fecha,altura,peso,maxppm) "
+                  "VALUES (:nombre,:photo,:fecha,:altura,:peso,:maxppm)");
     QSqlQuery queryAdd;
     queryAdd.prepare(pedido);
     queryAdd.bindValue(":nombre", data.nombre);
@@ -209,6 +210,7 @@ bool DbManager::addPerfil(PerfilBlock data)
     queryAdd.bindValue(":fecha", data.fecha);
     queryAdd.bindValue(":altura",data.altura);
     queryAdd.bindValue(":peso",data.peso);
+    queryAdd.bindValue(":maxppm",data.maxppm);
     if(queryAdd.exec())
     {
         success = true;
@@ -231,7 +233,7 @@ bool DbManager::buscarPerfil(const QString& name)
     bool ok;
     int dia, mes, ano;
     QSqlQuery checkQuery;
-    checkQuery.prepare("SELECT id, nombre, photo, fecha, peso, altura FROM perfiles WHERE nombre = (:name)");
+    checkQuery.prepare("SELECT id, nombre, photo, fecha, peso, altura, maxppm FROM perfiles WHERE nombre = (:name)");
     checkQuery.bindValue(":name", name);
     if (checkQuery.exec())
     {
@@ -243,6 +245,7 @@ bool DbManager::buscarPerfil(const QString& name)
             perfilBuscado.fecha = checkQuery.value(3).toDate();
             perfilBuscado.altura = checkQuery.value(4).toInt(&ok);
             perfilBuscado.peso = checkQuery.value(5).toInt(&ok);
+            perfilBuscado.maxppm = checkQuery.value(6).toInt(&ok);
         }
     }
     else

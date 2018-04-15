@@ -27,7 +27,7 @@ public:
     void setTiempoPulso(QTime time, int pulse, float velocidad);
     void clearData();
     void initGrafPulsos();
-    void setNombre(const QString &name);
+    void setNombre(const QString &name, const int &maxppm);
     void setDatos(const float &maxVel,const int &maxPul,const int &minPul,const int &promPul);
 
 signals:
@@ -47,6 +47,7 @@ private:
     QVector<double> pulsos;
     QVector<double> velocidades;
     float vMax;
+    int fcmax;
 };
 
 #endif // DIALOG_GPS_H

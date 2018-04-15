@@ -23,6 +23,7 @@ public:
         QByteArray photo;
         int peso;
         int altura;
+        int maxppm;
         QDate fecha;
     };
 

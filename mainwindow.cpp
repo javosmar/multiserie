@@ -383,7 +383,8 @@ void MainWindow::on_actionNew_triggered()
 
 void MainWindow::setNombre(const QString &name)
 {
-    nombre = name;
+    nombre = quitarEspacio(name);
+    buscarJugador(nombre);
 }
 
 void MainWindow::actualizarLista()
@@ -425,7 +426,7 @@ void MainWindow::mostrarAnalisis()
         for(int jndice=0;jndice<fil;jndice++){
             vector3[indice][jndice] = 0;
         }
-    dialogoGps->setNombre(nombre);
+    dialogoGps->setNombre(agregarEspacio(nombre),perfilBuscado.maxppm);
     dialogoGps->plot(vector3,col);
     dialogoGps->clearData();
 }
@@ -437,7 +438,10 @@ QString MainWindow::obtenerPulsacionMaxima(int numero)
 //        pulso = 0;
 //        return "max";
 //    }
-    return QString::number(pulso);
+    if(pulso == 0)
+        return "max";
+    else
+        return QString::number(pulso);
 }
 
 QString MainWindow::obtenerPulsacionMinima(int numero)
@@ -447,15 +451,18 @@ QString MainWindow::obtenerPulsacionMinima(int numero)
 //        pulso = 0;
 //        return "min";
 //    }
-    return QString::number(pulso);
+    if(pulso == 300)
+        return "min";
+    else
+        return QString::number(pulso);
 }
 
 QString MainWindow::obtenerPulsacionActual(int numero)
 {
     int pulso = actualPulso[numero];
-    if((pulso < 40)||(pulso > 200)){
+    if((pulso < 40)||(pulso > 220)){
         pulso = 0;
-        return "AVG";
+        return "---";
     }
     return QString::number(pulso);
 }
@@ -593,7 +600,7 @@ void MainWindow::buscarFecha()
 
 //----------------------
 
-bool MainWindow::nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso)
+bool MainWindow::nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso, const QString &maxPPM)
 {
     bool flag = false;
     if(!nombre.isEmpty() && !fecha.isEmpty() && !altura.isEmpty() && !peso.isEmpty()){
@@ -602,6 +609,7 @@ bool MainWindow::nuevoJugador(const QString &nombre, const QString &fecha, const
         perfilNuevo.fecha = formatoFecha(fecha);
         perfilNuevo.altura = altura.toInt(&ok);
         perfilNuevo.peso = peso.toInt(&ok);
+        perfilNuevo.maxppm = maxPPM.toInt(&ok);
         bool flag1 = db->addPerfil(perfilNuevo);
         bool flag2 = db->createTable(nuevoNombre);
         flag = flag1&&flag2;
@@ -622,9 +630,15 @@ QStringList MainWindow::obtenerJugador()
 {
     QStringList perfilEncontrado;
     perfilEncontrado.append(perfilBuscado.nombre);
-    perfilEncontrado.append(perfilBuscado.fecha.toString("dd-MM-yyyy"));
+//    perfilEncontrado.append(perfilBuscado.fecha.toString("dd-MM-yyyy"));
+    //---cálculo de edad---
+    QDate hoy = QDate::currentDate();
+    int edad = perfilBuscado.fecha.daysTo(hoy)/365;
+    perfilEncontrado.append(QString::number(edad));
+    //---------------------
     perfilEncontrado.append(QString::number(perfilBuscado.altura));
     perfilEncontrado.append(QString::number(perfilBuscado.peso));
+    perfilEncontrado.append(QString::number(perfilBuscado.maxppm));
     perfilEncontrado.append(QString(perfilBuscado.photo));
     return perfilEncontrado;
 }

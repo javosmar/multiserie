@@ -1,8 +1,8 @@
 #include "dialog_gps.h"
 #include "ui_dialog_gps.h"
 
-#define cantidadMuestras 249
-#define fcmax 200
+//#define cantidadMuestras 249
+//#define fcmax 200
 
 QLinearGradient plotGradient;
 
@@ -23,6 +23,7 @@ Dialog_Gps::Dialog_Gps(QWidget *parent) :
     ui->plot->xAxis2->setVisible(false);
     ui->plot->setVisible(false);
     vMax = 10;
+    fcmax = 200;
 }
 
 Dialog_Gps::~Dialog_Gps()
@@ -261,9 +262,10 @@ void Dialog_Gps::initGrafPulsos()
     ui->plotPulse->replot();
 }
 
-void Dialog_Gps::setNombre(const QString &name)
+void Dialog_Gps::setNombre(const QString &name, const int &maxppm)
 {
     this->setWindowTitle(name);
+    fcmax = maxppm;
 }
 
 void Dialog_Gps::setDatos(const float &maxVel, const int &maxPul, const int &minPul, const int &promPul)
@@ -271,6 +273,7 @@ void Dialog_Gps::setDatos(const float &maxVel, const int &maxPul, const int &min
     ui->labelMaxPulsaciones->setText(QString::number(maxPul).append(" ppm"));
     ui->labelMinPulsaciones->setText(QString::number(minPul).append(" ppm"));
     ui->labelPromPulsaciones->setText(QString::number(promPul).append(" ppm"));
+    ui->labelFcmax->setText(QString::number(fcmax).append(" ppm"));
     ui->labelVelocidad->setText(QString::number(maxVel,'f',2).append(" m/s"));
     vMax = maxVel;
 }

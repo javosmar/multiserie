@@ -62,7 +62,7 @@ Item {
 
                 Text {
                     id: titulo
-                    text: "GPSport"
+                    text: "Nombre"
                     y: (backCat.height - (titulo.height + subtitulo.height)) / 2
                     anchors.horizontalCenter: backCat.horizontalCenter
                     font.pointSize: 75
@@ -133,11 +133,12 @@ Item {
                         minPulso = mainWidget.obtenerPulsacionMinima(ix);
                         grilla.model.append({
                                                 Jugador: jugador[0],
-                                                Foto: "data:image/png;base64," + jugador[4],
-                                                Fecha: jugador[1],
-                                                Peso: jugador[2],
-                                                Altura: jugador[3],
-                                                Pulso: "AVG",
+                                                Foto: "data:image/png;base64," + jugador[5],
+                                                Fecha: "Edad: " + jugador[1],
+                                                Peso: "Peso: " + jugador[2],
+                                                Altura: "Altura: " + jugador[3],
+                                                MaxPPM: "Fcmax: " + jugador[4],
+                                                Pulso: "---",
                                                 Max: maxPulso,
                                                 Min: minPulso,
                                                 visibilidad: false});
@@ -192,7 +193,7 @@ Item {
                         anchors.top: pic.bottom
                         anchors.topMargin: 10
                         color: 'white'
-                        text: Fecha
+                        text: Fecha + " años"
                     }
 
                     Text {
@@ -202,7 +203,7 @@ Item {
                         anchors.top: textFecha.bottom
                         anchors.topMargin: 10
                         color: 'white'
-                        text: Altura + " [cm]"
+                        text: Altura + " cm"
                     }
 
                     Text {
@@ -212,7 +213,17 @@ Item {
                         anchors.top: textAltura.bottom
                         anchors.topMargin: 10
                         color: 'white'
-                        text: Peso + " [kg]"
+                        text: Peso + " kg"
+                    }
+
+                    Text {
+                        id: textPPM
+                        font.pointSize: 15
+                        anchors.left: textNombre.left
+                        anchors.top: textPeso.bottom
+                        anchors.topMargin: 10
+                        color: 'white'
+                        text: MaxPPM + " ppm"
                     }
 
                     MouseArea {
@@ -281,7 +292,9 @@ Item {
                     Image {
                         id: heart
                         anchors.horizontalCenter: columnaEstadistica.horizontalCenter
-                        anchors.top: columnaEstadistica.bottom
+//                        anchors.top: columnaEstadistica.bottom
+                        anchors.bottom: pic.bottom
+//                        y: columnaEstadistica.y + pic.height / 2//columnaEstadistica.height/2
                         width: ((myParent.width - pic.width) * 0.4)
                         height: width
                         source: "qrc:/Icons/heart.png"
@@ -533,10 +546,24 @@ Item {
 
                     TextField {
                         id: pesoTextField
-                        KeyNavigation.tab: nombreTextField
+                        KeyNavigation.tab: maxPulsoTextField
                         font.pointSize: 15
                         width: alturaTextField.width
                         height: pesoLabel.paintedHeight + 10
+                    }
+                    Label {
+                        id: maxPulsoLabel
+                        text: 'fcmax [ppm]'
+                        color: 'white'
+                        font.pointSize: 15
+                    }
+
+                    TextField {
+                        id: maxPulsoTextField
+                        KeyNavigation.tab: nombreTextField
+                        font.pointSize: 15
+                        width: alturaTextField.width
+                        height: maxPulsoLabel.paintedHeight + 10
                     }
                 }
 
@@ -601,7 +628,7 @@ Item {
 
                 onClicked: {
                     var flag = mainWidget.nuevoJugador(nombreTextField.text,fechaTextField.text,
-                                            alturaTextField.text,pesoTextField.text);
+                                            alturaTextField.text,pesoTextField.text,maxPulsoTextField.text);
                     if(flag){
                         stack.push(pulsacion);
                         mainWidget.habilitarConexion();

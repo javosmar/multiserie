@@ -54,7 +54,7 @@ public:
     //------------
     void mostrarFechas(const QString &name);
     //-----------
-    Q_INVOKABLE bool nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso);
+    Q_INVOKABLE bool nuevoJugador(const QString &nombre, const QString &fecha, const QString &altura, const QString &peso, const QString &maxPPM);
     Q_INVOKABLE QString cargarPhoto_clicked();
     Q_INVOKABLE bool buscarJugador(const QString &buscado);
     Q_INVOKABLE QStringList obtenerJugador();
