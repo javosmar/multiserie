@@ -1,4 +1,4 @@
 Autores: Facundo Beade - Martin Acosta - 2018
 # Sistema de seguimiento GPS y control biométrico para deportistas
 ## Proyecto final de grado - UTN FRP
-![](https://i.ibb.co/wNDvwH3/gpsports.gif)
+![proyecto](https://i.ibb.co/wNDvwH3/gpsports.gif)
