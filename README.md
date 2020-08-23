@@ -3,8 +3,9 @@ Autores: Facundo Beade - Martin Acosta - 2018
 ## Proyecto final de grado - Ingeniería en Electrónica - UTN FRP
 ## Descripción 📋
 Dashboard de control para el análisis mediante estadísticas obtenidas en los entrenamientos, basadas en el posicionamiento dentro del campo de juego, velocidades características y evolución del ritmo cardíaco.
-## Captura de la aplicación 📸
+## Capturas de la aplicación 📸
 ![proyecto](https://i.ibb.co/pwgdnBM/gpsports.gif)
+![mapa de calor](https://i.ibb.co/x3pvXWb/5.jpg)
 ## Construido con 🛠️
 * [Qt](https://www.qt.io/)
 * [Sqlite](https://www.sqlite.org/)
